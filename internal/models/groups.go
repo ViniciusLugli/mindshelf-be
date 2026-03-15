@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type Group struct {
-	gorm.Model
+	BaseModel
 	Name  string `gorm:"not null"`
 	Tasks []Task
 }

@@ -1,10 +1,9 @@
 package models
 
-import "gorm.io/gorm"
-
 type Users struct {
-	gorm.Model
-	Name     string
-	Email    string
-	Password string
+	BaseModel
+	Name     string `gorm:"not null"`
+	Email    string `gorm:"not null"`
+	Password string `gorm:"not null"`
+	Groups   []Group
 }
