@@ -1,5 +1,5 @@
 CREATE TABLE users(
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users(
 );
 
 CREATE TABLE groups(
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -22,7 +22,7 @@ CREATE TABLE groups(
 CREATE INDEX idx_groups_user_id ON groups(user_id);
 
 CREATE TABLE tasks(
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

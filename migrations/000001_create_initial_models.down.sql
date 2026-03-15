@@ -2,6 +2,6 @@ DROP INDEX IF EXISTS idx_tasks_group_id;
 DROP INDEX IF EXISTS idx_groups_user_id;
 
 DROP TABLE IF EXISTS tasks;
-DROP TABLE IF EXISTS group;
+DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS users;
 
