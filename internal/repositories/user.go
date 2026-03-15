@@ -14,35 +14,35 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(user *models.Users) error {
+func (r *UserRepository) Create(user *models.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *UserRepository) Update(user *models.Users) error {
+func (r *UserRepository) Update(user *models.User) error {
 	return r.db.Model(user).Updates(user).Error
 }
 
-func (r *UserRepository) Delete(user *models.Users) error {
+func (r *UserRepository) Delete(user *models.User) error {
 	return r.db.Delete(user).Error
 }
 
-func (r *UserRepository) GetByID(id uuid.UUID) (models.Users, error) {
-	var user models.Users
+func (r *UserRepository) GetByID(id uuid.UUID) (models.User, error) {
+	var user models.User
 	err := r.db.First(&user, id).Error
 	return user, err
 }
 
-func (r *UserRepository) GetByEmail(email string) (models.Users, error) {
-	var user models.Users
+func (r *UserRepository) GetByEmail(email string) (models.User, error) {
+	var user models.User
 	err := r.db.First(&user, email).Error
 	return user, err
 }
 
-func (r *UserRepository) GetAll(limit, offset int) ([]models.Users, int64, error) {
-	var users []models.Users
+func (r *UserRepository) GetAll(limit, offset int) ([]models.User, int64, error) {
+	var users []models.User
 	var count int64
 
-	err := r.db.Model(&models.Users{}).Count(&count).Error
+	err := r.db.Model(&models.User{}).Count(&count).Error
 	if err != nil {
 		return users, count, err
 	}

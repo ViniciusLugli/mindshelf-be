@@ -1,6 +1,6 @@
 package models
 
-type Users struct {
+type User struct {
 	BaseModel
 	Name     string `gorm:"not null"`
 	Email    string `gorm:"not null"`

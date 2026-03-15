@@ -32,8 +32,8 @@ type DeleteUserRequest struct {
 	ID uuid.UUID `form:"id" binding:"required,uuid"`
 }
 
-func (d *CreateUserRequest) ToModel() models.Users {
-	return models.Users{
+func (d *CreateUserRequest) ToModel() models.User {
+	return models.User{
 		Name:     d.Name,
 		Email:    d.Email,
 		Password: d.Password,
