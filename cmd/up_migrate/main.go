@@ -26,4 +26,6 @@ func main() {
 	if err := m.Up(); err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println("Migrations applied successfully")
 }
