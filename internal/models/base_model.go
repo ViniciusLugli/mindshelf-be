@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type BaseModel struct {
@@ -11,5 +12,10 @@ type BaseModel struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Deleted   bool
-	DeletedAt time.Time `gorm:"index"`
+	DeletedAt *time.Time `gorm:"index"`
+}
+
+func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
+	b.ID = uuid.New()
+	return nil
 }

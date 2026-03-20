@@ -8,13 +8,7 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
-
-type Task struct {
-	gorm.Model
-	Title string `gorm:"not null"`
-}
 
 func main() {
 	err := godotenv.Load()
