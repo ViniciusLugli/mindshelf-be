@@ -52,7 +52,7 @@ func (s *UserService) GetUser(dto requests.GetUser) (responses.UserResponse, err
 			return responses.UserResponse{}, err
 		}
 
-		return responses.ToDTO(user), nil
+		return responses.NewUserResponse(user), nil
 	}
 
 	if dto.Email != "" {
@@ -61,7 +61,7 @@ func (s *UserService) GetUser(dto requests.GetUser) (responses.UserResponse, err
 			return responses.UserResponse{}, err
 		}
 
-		return responses.ToDTO(user), err
+		return responses.NewUserResponse(user), err
 	}
 
 	return responses.UserResponse{}, errors.New("no valid params was passed")
@@ -76,5 +76,5 @@ func (s *UserService) GetAllUsers(dto requests.GetAllUsers) (responses.Paginated
 	}
 
 	total_pages := math.Ceil(float64(count) / float64(dto.Limit))
-	return responses.ToDTOList(users, count, dto.Page, dto.Limit, int(total_pages)), nil
+	return responses.NewPaginatedUserResponse(users, count, dto.Page, dto.Limit, int(total_pages)), nil
 }

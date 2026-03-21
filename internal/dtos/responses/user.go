@@ -19,18 +19,18 @@ type PaginatedUserResponse struct {
 	Total_pages int            `json:"total_pages"`
 }
 
-func ToDTO(user models.User) UserResponse {
+func NewUserResponse(user models.User) UserResponse {
 	return UserResponse{
 		ID:    user.ID,
-		Name:  user.Email,
+		Name:  user.Name,
 		Email: user.Email,
 	}
 }
 
-func ToDTOList(users []models.User, total int64, page, limit, total_pages int) PaginatedUserResponse {
+func NewPaginatedUserResponse(users []models.User, total int64, page, limit, total_pages int) PaginatedUserResponse {
 	data := make([]UserResponse, len(users))
 	for i, user := range users {
-		data[i] = ToDTO(user)
+		data[i] = NewUserResponse(user)
 	}
 
 	return PaginatedUserResponse{
