@@ -82,13 +82,18 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *GroupHandler) GetAllGroupsByEmail(c *gin.Context) {
+func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 	var dto requests.GetAllGroupsByName
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindUri(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
+	}
+
+	if err := c.ShouldBindQuery(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -106,7 +111,7 @@ func (h *GroupHandler) GetAllGroupsByEmail(c *gin.Context) {
 func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 	var dto requests.GetGroupByID
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindUri(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

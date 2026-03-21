@@ -25,6 +25,10 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
+	groupRepository := repositories.NewGroupRepository(db)
+	groupService := services.NewGroupService(groupRepository)
+	groupHandler := handlers.NewGroupHandler(groupService)
+
 	router := gin.Default()
 
 	{
@@ -34,6 +38,16 @@ func main() {
 		userRoute.POST("/create", userHandler.Create)
 		userRoute.PATCH("/update", userHandler.Update)
 		userRoute.DELETE("/delete", userHandler.Delete)
+	}
+
+	{
+		groupRoute := router.Group("/group")
+		groupRoute.GET("/", groupHandler.GetAllGroups)
+		groupRoute.GET("/:id", groupHandler.GetGroupByID)
+		groupRoute.GET("/:name", groupHandler.GetAllGroupsByName)
+		groupRoute.POST("/create", groupHandler.Create)
+		groupRoute.PATCH("/update", groupHandler.Update)
+		groupRoute.POST("/delete", groupHandler.Delete)
 	}
 
 	router.Run()
