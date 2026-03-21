@@ -6,8 +6,8 @@ import (
 )
 
 type GetGroup struct {
-	Name string    `form:"name"`
 	ID   uuid.UUID `form:"id"`
+	Name string    `form:"name"`
 }
 
 type GetAllGroups struct {

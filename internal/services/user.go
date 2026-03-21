@@ -67,14 +67,14 @@ func (s *UserService) GetUser(dto requests.GetUser) (responses.UserResponse, err
 	return responses.UserResponse{}, errors.New("no valid params was passed")
 }
 
-func (s *UserService) GetAllUsers(dto requests.GetAllUsers) (responses.PaginatedUserResponse, error) {
+func (s *UserService) GetAllUsers(dto requests.GetAllUsers) (responses.PaginatedResponse[responses.UserResponse], error) {
 	offset := (dto.Page - 1) * dto.Limit
 
 	users, count, err := s.repo.GetAll(dto.Limit, offset)
 	if err != nil {
-		return responses.PaginatedUserResponse{}, err
+		return responses.PaginatedResponse[responses.UserResponse]{}, err
 	}
 
-	total_pages := math.Ceil(float64(count) / float64(dto.Limit))
-	return responses.NewPaginatedUserResponse(users, count, dto.Page, dto.Limit, int(total_pages)), nil
+	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
+	return responses.NewPaginatedResponse(users, responses.NewUserResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
 }
