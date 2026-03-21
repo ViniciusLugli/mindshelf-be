@@ -38,6 +38,23 @@ func (r *TaskRepository) GetByTitle(title string) (models.Task, error) {
 	return task, err
 }
 
+func (r *TaskRepository) GetAllByTitle(title string, limit, offset int) ([]models.Task, int64, error) {
+	var tasks []models.Task
+	var count int64
+
+	err := r.db.Model(&models.Task{}).Where("title LIKE ?", "%"+title+"%").Count(&count).Error
+	if err != nil {
+		return tasks, count, err
+	}
+
+	err = r.db.Where("title LIKE ?", "%"+title+"%").Limit(limit).Offset(offset).Find(&tasks).Error
+	if err != nil {
+		return tasks, count, err
+	}
+
+	return tasks, count, nil
+}
+
 func (r *TaskRepository) GetAll(limit, offset int) ([]models.Task, int64, error) {
 	var tasks []models.Task
 	var count int64

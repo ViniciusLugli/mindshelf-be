@@ -15,6 +15,12 @@ type GetAllUsers struct {
 	Limit int `form:"limit" binding:"min=1,max=300,required"`
 }
 
+type GetAllUsersByName struct {
+	Name  string `uri:"name" binding:"required"`
+	Page  int    `form:"page" binding:"min=1,required"`
+	Limit int    `form:"limit" binding:"min=1,max=300,required"`
+}
+
 type CreateUserRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`

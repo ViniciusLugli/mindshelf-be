@@ -6,13 +6,18 @@ import (
 )
 
 type GetTask struct {
-	ID    uuid.UUID `form:"id"`
-	Title string    `form:"title"`
+	ID uuid.UUID `form:"id" binding:"required,uuid"`
 }
 
 type GetAllTasks struct {
 	Page  int `form:"page" binding:"min=1,required"`
 	Limit int `form:"limit" binding:"min=1,max=300,required"`
+}
+
+type GetAllTasksByTitle struct {
+	Title string `uri:"title" binding:"required"`
+	Page  int    `form:"page" binding:"min=1,required"`
+	Limit int    `form:"limit" binding:"min=1,max=300,required"`
 }
 
 type CreateTaskRequest struct {

@@ -128,3 +128,30 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, tasks)
 }
+
+func (h *TaskHandler) GetAllTasksByTitle(c *gin.Context) {
+	var dto requests.GetAllTasksByTitle
+
+	if err := c.ShouldBindUri(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := c.ShouldBindQuery(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tasks, err := h.service.GetAllTasksByTitle(dto)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}

@@ -78,3 +78,15 @@ func (s *UserService) GetAllUsers(dto requests.GetAllUsers) (responses.Paginated
 	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
 	return responses.NewPaginatedResponse(users, responses.NewUserResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
 }
+
+func (s *UserService) GetAllUsersByName(dto requests.GetAllUsersByName) (responses.PaginatedResponse[responses.UserResponse], error) {
+	offset := (dto.Page - 1) * dto.Limit
+
+	users, count, err := s.repo.GetAllByName(dto.Name, dto.Limit, offset)
+	if err != nil {
+		return responses.PaginatedResponse[responses.UserResponse]{}, err
+	}
+
+	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
+	return responses.NewPaginatedResponse(users, responses.NewUserResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
+}

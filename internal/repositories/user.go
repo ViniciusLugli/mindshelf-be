@@ -34,8 +34,25 @@ func (r *UserRepository) GetByID(id uuid.UUID) (models.User, error) {
 
 func (r *UserRepository) GetByEmail(email string) (models.User, error) {
 	var user models.User
-	err := r.db.First(&user, email).Error
+	err := r.db.Where("email = ?", email).First(&user).Error
 	return user, err
+}
+
+func (r *UserRepository) GetAllByName(name string, limit, offset int) ([]models.User, int64, error) {
+	var users []models.User
+	var count int64
+
+	err := r.db.Model(&models.User{}).Where("name LIKE ?", "%"+name+"%").Count(&count).Error
+	if err != nil {
+		return users, count, err
+	}
+
+	err = r.db.Where("name LIKE ?", "%"+name+"%").Limit(limit).Offset(offset).Find(&users).Error
+	if err != nil {
+		return users, count, err
+	}
+
+	return users, count, nil
 }
 
 func (r *UserRepository) GetAll(limit, offset int) ([]models.User, int64, error) {
