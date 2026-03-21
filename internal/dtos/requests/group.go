@@ -5,9 +5,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetGroup struct {
-	ID   uuid.UUID `form:"id"`
-	Name string    `form:"name"`
+type GetGroupByID struct {
+	ID uuid.UUID `form:"id" binding:"required,uuid"`
+}
+
+type GetAllGroupsByName struct {
+	Name  string `form:"name" binding:"required"`
+	Page  int    `form:"page" binding:"min=1,required"`
+	Limit int    `form:"limit" binding:"min=1,max=300,required"`
 }
 
 type GetAllGroups struct {
