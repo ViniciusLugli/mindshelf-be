@@ -10,16 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserHandler struct {
-	service *services.UserService
+type GroupHandler struct {
+	service *services.GroupService
 }
 
-func NewUserHandler(service *services.UserService) *UserHandler {
-	return &UserHandler{service: service}
+func NewGroupHandler(service *services.GroupService) *GroupHandler {
+	return &GroupHandler{service: service}
 }
 
-func (h *UserHandler) Create(c *gin.Context) {
-	var dto requests.CreateUserRequest
+func (h *GroupHandler) Create(c *gin.Context) {
+	var dto requests.CreateGroupRequest
+
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -35,12 +36,13 @@ func (h *UserHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "user created",
+		"message": "group created successfully",
 	})
 }
 
-func (h *UserHandler) Update(c *gin.Context) {
-	var dto requests.UpdateUserRequest
+func (h *GroupHandler) Update(c *gin.Context) {
+	var dto requests.UpdateGroupRequest
+
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -56,12 +58,13 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "user updated succesfully",
+		"message": "group updated successfully",
 	})
 }
 
-func (h *UserHandler) Delete(c *gin.Context) {
-	var dto requests.DeleteUserRequest
+func (h *GroupHandler) Delete(c *gin.Context) {
+	var dto requests.DeleteGroupRequest
+
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -79,8 +82,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *UserHandler) GetUser(c *gin.Context) {
-	var dto requests.GetUser
+func (h *GroupHandler) GetAllGroupsByEmail(c *gin.Context) {
+	var dto requests.GetAllGroupsByName
+
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -88,11 +92,32 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUser(dto)
+	groups, err := h.service.GetGroupByName(dto)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, groups)
+}
+
+func (h *GroupHandler) GetGroupByID(c *gin.Context) {
+	var dto requests.GetGroupByID
+
+	if err := c.ShouldBind(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	group, err := h.service.GetGroupByID(dto)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": "user not found",
+				"error": "group not found",
 			})
 
 			return
@@ -105,26 +130,24 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, group)
 }
 
-func (h *UserHandler) GetAllUsers(c *gin.Context) {
-	var dto requests.GetAllUsers
-	if err := c.ShouldBind(&dto); err != nil {
+func (h *GroupHandler) GetAllGroups(c *gin.Context) {
+	var dto requests.GetAllGroups
+
+	if err := c.ShouldBind(dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		return
 	}
 
-	users, err := h.service.GetAllUsers(dto)
+	groups, err := h.service.GetAll(dto)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-
-		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, groups)
 }
