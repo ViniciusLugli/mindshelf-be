@@ -33,14 +33,9 @@ type LoginRequest struct {
 }
 
 type UpdateUserRequest struct {
-	ID       uuid.UUID `json:"id" binding:"required,uuid"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email" binding:"email"`
-	Password string    `json:"password"`
-}
-
-type DeleteUserRequest struct {
-	ID uuid.UUID `form:"id" binding:"required,uuid"`
+	Name     string `json:"name"`
+	Email    string `json:"email" binding:"email"`
+	Password string `json:"password"`
 }
 
 func (d *CreateUserRequest) ToModel() models.User {

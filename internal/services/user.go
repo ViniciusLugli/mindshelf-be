@@ -18,8 +18,8 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Update(dto requests.UpdateUserRequest) error {
-	user, err := s.repo.GetByID(dto.ID)
+func (s *UserService) Update(dto requests.UpdateUserRequest, id uuid.UUID) error {
+	user, err := s.repo.GetByID(id)
 	if err != nil {
 		return err
 	}
@@ -31,8 +31,8 @@ func (s *UserService) Update(dto requests.UpdateUserRequest) error {
 	return s.repo.Update(&user)
 }
 
-func (s *UserService) Delete(dto requests.DeleteUserRequest) error {
-	user, err := s.repo.GetByID(dto.ID)
+func (s *UserService) Delete(id uuid.UUID) error {
+	user, err := s.repo.GetByID(id)
 	if err != nil {
 		return err
 	}

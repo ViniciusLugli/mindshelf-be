@@ -21,8 +21,7 @@ type GetAllGroups struct {
 }
 
 type CreateGroupRequest struct {
-	UserID uuid.UUID `json:"user_id" binding:"uuid,required"`
-	Name   string    `json:"name" binding:"required"`
+	Name string `json:"name" binding:"required"`
 }
 
 type UpdateGroupRequest struct {
@@ -36,7 +35,6 @@ type DeleteGroupRequest struct {
 
 func (d *CreateGroupRequest) ToModel() models.Group {
 	return models.Group{
-		Name:   d.Name,
-		UserID: d.UserID,
+		Name: d.Name,
 	}
 }
