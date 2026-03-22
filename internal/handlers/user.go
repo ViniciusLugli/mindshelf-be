@@ -18,27 +18,6 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
-func (h *UserHandler) Create(c *gin.Context) {
-	var dto requests.CreateUserRequest
-	if err := c.ShouldBind(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	if err := h.service.Create(dto); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "user created",
-	})
-}
-
 func (h *UserHandler) Update(c *gin.Context) {
 	var dto requests.UpdateUserRequest
 	if err := c.ShouldBind(&dto); err != nil {
