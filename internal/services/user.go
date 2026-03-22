@@ -6,7 +6,9 @@ import (
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
+	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
+	"github.com/ViniciusLugli/mindshelf/internal/utils"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,17 +31,29 @@ func CheckPassword(password string, hash string) bool {
 	return err == nil
 }
 
-func (s *UserService) Create(dto requests.CreateUserRequest) error {
-	user := dto.ToModel()
-
-	hashedPassword, err := HashPassword(user.Password)
+func (s *UserService) Create(dto requests.CreateUserRequest) (responses.AuthResponse, error) {
+	hashedPassword, err := HashPassword(dto.Password)
 	if err != nil {
-		return err
+		return responses.AuthResponse{}, errors.New("error processing password")
 	}
 
-	user.Password = hashedPassword
+	user := &models.User{
+		Name:     dto.Name,
+		Email:    dto.Email,
+		Password: hashedPassword,
+	}
 
-	return s.repo.Create(&user)
+	created, err := s.repo.Create(user)
+	if err != nil {
+		return responses.AuthResponse{}, errors.New("error saving user")
+	}
+
+	token, err := utils.GenerateToken(created.ID, created.Email)
+	if err != nil {
+		return responses.AuthResponse{}, errors.New("error generating JWT token")
+	}
+
+	return responses.NewAuthResponse(token, *created), nil
 }
 
 func (s *UserService) Update(dto requests.UpdateUserRequest) error {
