@@ -8,6 +8,7 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -18,8 +19,26 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	return string(bytes), err
+}
+
+func CheckPassword(password string, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 func (s *UserService) Create(dto requests.CreateUserRequest) error {
 	user := dto.ToModel()
+
+	hashedPassword, err := HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	user.Password = hashedPassword
+
 	return s.repo.Create(&user)
 }
 
