@@ -6,6 +6,7 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
+	"github.com/google/uuid"
 )
 
 type TaskService struct {
@@ -21,8 +22,8 @@ func (s *TaskService) Create(dto requests.CreateTaskRequest) error {
 	return s.repo.Create(&task)
 }
 
-func (s *TaskService) Update(dto requests.UpdateTaskRequest) error {
-	task, err := s.repo.GetByID(dto.ID)
+func (s *TaskService) Update(dto requests.UpdateTaskRequest, userID uuid.UUID) error {
+	task, err := s.repo.GetByID(dto.ID, userID)
 	if err != nil {
 		return err
 	}
@@ -33,8 +34,8 @@ func (s *TaskService) Update(dto requests.UpdateTaskRequest) error {
 	return s.repo.Update(&task)
 }
 
-func (s *TaskService) Delete(dto requests.DeleteTaskRequest) error {
-	task, err := s.repo.GetByID(dto.ID)
+func (s *TaskService) Delete(dto requests.DeleteTaskRequest, userID uuid.UUID) error {
+	task, err := s.repo.GetByID(dto.ID, userID)
 	if err != nil {
 		return err
 	}
@@ -42,8 +43,8 @@ func (s *TaskService) Delete(dto requests.DeleteTaskRequest) error {
 	return s.repo.Delete(&task)
 }
 
-func (s *TaskService) GetTask(dto requests.GetTask) (responses.TaskResponse, error) {
-	task, err := s.repo.GetByID(dto.ID)
+func (s *TaskService) GetTask(dto requests.GetTask, userID uuid.UUID) (responses.TaskResponse, error) {
+	task, err := s.repo.GetByID(dto.ID, userID)
 	if err != nil {
 		return responses.TaskResponse{}, err
 	}
@@ -51,10 +52,10 @@ func (s *TaskService) GetTask(dto requests.GetTask) (responses.TaskResponse, err
 	return responses.NewTaskResponse(task), nil
 }
 
-func (s *TaskService) GetAllTasks(dto requests.GetAllTasks) (responses.PaginatedResponse[responses.TaskResponse], error) {
+func (s *TaskService) GetAllTasks(dto requests.GetAllTasks, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
 	offset := (dto.Page - 1) * dto.Limit
 
-	tasks, count, err := s.repo.GetAll(dto.Limit, offset)
+	tasks, count, err := s.repo.GetAll(dto.Limit, offset, userID)
 	if err != nil {
 		return responses.PaginatedResponse[responses.TaskResponse]{}, err
 	}
@@ -63,10 +64,10 @@ func (s *TaskService) GetAllTasks(dto requests.GetAllTasks) (responses.Paginated
 	return responses.NewPaginatedResponse(tasks, responses.NewTaskResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
 }
 
-func (s *TaskService) GetAllTasksByTitle(dto requests.GetAllTasksByTitle) (responses.PaginatedResponse[responses.TaskResponse], error) {
+func (s *TaskService) GetAllTasksByTitle(dto requests.GetAllTasksByTitle, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
 	offset := (dto.Page - 1) * dto.Limit
 
-	tasks, count, err := s.repo.GetAllByTitle(dto.Title, dto.Limit, offset)
+	tasks, count, err := s.repo.GetAllByTitle(dto.Title, dto.Limit, offset, userID)
 	if err != nil {
 		return responses.PaginatedResponse[responses.TaskResponse]{}, err
 	}

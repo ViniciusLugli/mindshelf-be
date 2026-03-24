@@ -26,33 +26,40 @@ func (r *GroupRepository) Delete(group *models.Group) error {
 	return r.db.Delete(group).Error
 }
 
-func (r *GroupRepository) GetByID(id uuid.UUID) (models.Group, error) {
+func (r *GroupRepository) GetByID(id uuid.UUID, userID uuid.UUID) (models.Group, error) {
 	var group models.Group
-	err := r.db.First(&group, id).Error
+	err := r.db.Where("id = ? AND user_id = ?", id, userID).First(&group).Error
 	return group, err
 }
 
-func (r *GroupRepository) GetAllByName(name string, limit, offset int) ([]models.Group, int64, error) {
+func (r *GroupRepository) GetAllByName(name string, limit, offset int, userID uuid.UUID) ([]models.Group, int64, error) {
 	var groups []models.Group
 	var count int64
 
-	err := r.db.Where("name LIKE ?", "%"+name+"%").Count(&count).Error
+	base := r.db.Where("name LIKE ? and user_id = ?", "%"+name+"%", userID)
 
-	err = r.db.Where("name LIKE ?", "%"+name+"%").Limit(limit).Offset(offset).Find(&groups).Error
-	return groups, count, err
+	if err := base.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := base.Limit(limit).Offset(offset).Find(&groups).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return groups, count, nil
 }
 
-func (r *GroupRepository) GetAll(limit, offset int) ([]models.Group, int64, error) {
+func (r *GroupRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.Group, int64, error) {
 	var groups []models.Group
 	var count int64
 
-	err := r.db.Model(groups).Count(&count).Error
-	if err != nil {
+	base := r.db.Model(groups).Where("user_id = ?", userID)
+
+	if err := base.Count(&count).Error; err != nil {
 		return groups, count, err
 	}
 
-	err = r.db.Limit(limit).Offset(offset).Find(&groups).Error
-	if err != nil {
+	if err := base.Limit(limit).Offset(offset).Find(&groups).Error; err != nil {
 		return groups, count, err
 	}
 

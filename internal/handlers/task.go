@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -40,6 +41,14 @@ func (h *TaskHandler) Create(c *gin.Context) {
 }
 
 func (h *TaskHandler) Update(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.UpdateTaskRequest
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -48,7 +57,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Update(dto); err != nil {
+	if err := h.service.Update(dto, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -61,6 +70,14 @@ func (h *TaskHandler) Update(c *gin.Context) {
 }
 
 func (h *TaskHandler) Delete(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.DeleteTaskRequest
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -69,7 +86,7 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(dto); err != nil {
+	if err := h.service.Delete(dto, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -80,6 +97,14 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetTask(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetTask
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -88,7 +113,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.service.GetTask(dto)
+	task, err := h.service.GetTask(dto, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -109,6 +134,14 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetAllTasks(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetAllTasks
 	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -117,7 +150,7 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 		return
 	}
 
-	tasks, err := h.service.GetAllTasks(dto)
+	tasks, err := h.service.GetAllTasks(dto, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -130,6 +163,14 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetAllTasksByTitle(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetAllTasksByTitle
 
 	if err := c.ShouldBindUri(&dto); err != nil {
@@ -144,7 +185,7 @@ func (h *TaskHandler) GetAllTasksByTitle(c *gin.Context) {
 		return
 	}
 
-	tasks, err := h.service.GetAllTasksByTitle(dto)
+	tasks, err := h.service.GetAllTasksByTitle(dto, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

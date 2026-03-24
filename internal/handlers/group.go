@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -41,6 +42,14 @@ func (h *GroupHandler) Create(c *gin.Context) {
 }
 
 func (h *GroupHandler) Update(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.UpdateGroupRequest
 
 	if err := c.ShouldBind(&dto); err != nil {
@@ -50,7 +59,7 @@ func (h *GroupHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Update(dto); err != nil {
+	if err := h.service.Update(dto, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -63,6 +72,14 @@ func (h *GroupHandler) Update(c *gin.Context) {
 }
 
 func (h *GroupHandler) Delete(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.DeleteGroupRequest
 
 	if err := c.ShouldBind(&dto); err != nil {
@@ -72,7 +89,7 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(dto); err != nil {
+	if err := h.service.Delete(dto, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -83,6 +100,14 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 }
 
 func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetAllGroupsByName
 
 	if err := c.ShouldBindUri(&dto); err != nil {
@@ -97,7 +122,7 @@ func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 		return
 	}
 
-	groups, err := h.service.GetGroupByName(dto)
+	groups, err := h.service.GetGroupByName(dto, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -109,6 +134,14 @@ func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 }
 
 func (h *GroupHandler) GetGroupByID(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetGroupByID
 
 	if err := c.ShouldBindUri(&dto); err != nil {
@@ -118,7 +151,7 @@ func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 		return
 	}
 
-	group, err := h.service.GetGroupByID(dto)
+	group, err := h.service.GetGroupByID(dto, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -139,6 +172,14 @@ func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 }
 
 func (h *GroupHandler) GetAllGroups(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.GetAllGroups
 
 	if err := c.ShouldBind(dto); err != nil {
@@ -147,7 +188,7 @@ func (h *GroupHandler) GetAllGroups(c *gin.Context) {
 		})
 	}
 
-	groups, err := h.service.GetAll(dto)
+	groups, err := h.service.GetAll(dto, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
