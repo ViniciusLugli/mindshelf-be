@@ -3,6 +3,7 @@ CREATE TABLE users(
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
+  avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   deleted BOOLEAN DEFAULT FALSE,
@@ -12,6 +13,7 @@ CREATE TABLE users(
 CREATE TABLE groups(
   id UUID PRIMARY KEY,
   name TEXT NOT NULL,
+  group_color TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   deleted BOOLEAN DEFAULT FALSE,

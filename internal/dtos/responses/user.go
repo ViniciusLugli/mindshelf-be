@@ -6,9 +6,10 @@ import (
 )
 
 type UserResponse struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Email string    `json:"email"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	AvatarURL string    `json:"avatar_url"`
 }
 
 type AuthResponse struct {
@@ -28,9 +29,10 @@ func NewAuthResponse(token string, user models.User) AuthResponse {
 	return AuthResponse{
 		Token: token,
 		User: UserResponse{
-			ID:    user.ID,
-			Name:  user.Name,
-			Email: user.Email,
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			AvatarURL: user.AvatarURL,
 		},
 	}
 }
