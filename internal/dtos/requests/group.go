@@ -33,8 +33,9 @@ type DeleteGroupRequest struct {
 	ID uuid.UUID `form:"id" binding:"uuid,required"`
 }
 
-func (d *CreateGroupRequest) ToModel() models.Group {
+func (d *CreateGroupRequest) ToModel(userID uuid.UUID) models.Group {
 	return models.Group{
-		Name: d.Name,
+		Name:   d.Name,
+		UserID: userID,
 	}
 }

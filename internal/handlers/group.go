@@ -20,6 +20,14 @@ func NewGroupHandler(service *services.GroupService) *GroupHandler {
 }
 
 func (h *GroupHandler) Create(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.CreateGroupRequest
 
 	if err := c.ShouldBind(&dto); err != nil {
@@ -29,7 +37,7 @@ func (h *GroupHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Create(dto); err != nil {
+	if err := h.service.Create(dto, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

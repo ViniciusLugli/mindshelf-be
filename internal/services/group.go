@@ -17,8 +17,8 @@ func NewGroupService(repo *repositories.GroupRepository) *GroupService {
 	return &GroupService{repo: repo}
 }
 
-func (s *GroupService) Create(dto requests.CreateGroupRequest) error {
-	group := dto.ToModel()
+func (s *GroupService) Create(dto requests.CreateGroupRequest, userID uuid.UUID) error {
+	group := dto.ToModel(userID)
 	return s.repo.Create(&group)
 }
 
