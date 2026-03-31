@@ -4,9 +4,11 @@ import (
 	"log"
 
 	"github.com/ViniciusLugli/mindshelf/internal/handlers"
+	wsHandler "github.com/ViniciusLugli/mindshelf/internal/handlers/ws"
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
+	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -45,6 +47,8 @@ func main() {
 	protected := router.Group("/api")
 	protected.Use(middlewares.Auth())
 
+	// API
+
 	{
 		userRoute := protected.Group("/user")
 		userRoute.GET("/", userHandler.GetUser)
@@ -52,14 +56,6 @@ func main() {
 		userRoute.GET("/:name", userHandler.GetAllUsersByName)
 		userRoute.PATCH("/update", userHandler.Update)
 		userRoute.DELETE("/delete", userHandler.Delete)
-	}
-
-	{
-		friendRoute := protected.Group("/friend")
-		friendRoute.GET("/", userHandler.GetFriends)
-		friendRoute.POST("/send", userHandler.SendFriendRequest)
-		friendRoute.POST("/accept", userHandler.AcceptFriendRequest)
-		friendRoute.POST("/reject", userHandler.RejectFriendRequest)
 	}
 
 	{
@@ -81,6 +77,17 @@ func main() {
 		taskRoute.PATCH("/update", taskHandler.Update)
 		taskRoute.DELETE("/delete", taskHandler.Delete)
 	}
+
+	// WebSocket
+
+	chatRepository := repositories.NewMessageRepository(db)
+	chatService := services.NewMessageService(chatRepository)
+
+	hub := util.NewHub()
+	wsRouter := util.NewRouter()
+
+	wsHandler.NewFriendHandlers(userService).Register(wsRouter)
+	wsHandler.NewChatHandler(chatService, hub)
 
 	router.Run()
 }
