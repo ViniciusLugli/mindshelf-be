@@ -19,6 +19,18 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
+// Update godoc
+// @Summary Update authenticated user
+// @Tags user
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param user body requests.UpdateUserRequest true "User data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/user/update [patch]
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -47,6 +59,15 @@ func (h *UserHandler) Update(c *gin.Context) {
 	})
 }
 
+// Delete godoc
+// @Summary Delete authenticated user
+// @Tags user
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 204 {string} string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/user/delete [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -93,6 +114,19 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+// GetAllUsers godoc
+// @Summary Get paginated users
+// @Tags user
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param page query int false "page"
+// @Param limit query int false "limit"
+// @Success 200 {object} responses.PaginatedUserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/user/all [get]
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	var dto requests.GetAllUsers

@@ -1,0 +1,594 @@
+basePath: /api
+definitions:
+  requests.CreateGroupRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  requests.CreateTaskRequest:
+    properties:
+      group_id:
+        type: string
+      notes:
+        type: string
+      title:
+        type: string
+    required:
+    - group_id
+    - title
+    type: object
+  requests.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  requests.DeleteTaskRequest:
+    properties:
+      id:
+        type: string
+    required:
+    - id
+    type: object
+  requests.FriendRequest:
+    properties:
+      friend_id:
+        type: string
+    required:
+    - friend_id
+    type: object
+  requests.GetChatRequest:
+    properties:
+      with_user_id:
+        type: string
+    type: object
+  requests.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  requests.SendChatRequest:
+    properties:
+      content:
+        type: string
+      to_user_id:
+        type: string
+    type: object
+  requests.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  responses.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/responses.UserResponse'
+    type: object
+  responses.PaginatedTaskResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/responses.TaskResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  responses.TaskResponse:
+    properties:
+      group_color:
+        type: string
+      group_id:
+        type: string
+      group_name:
+        type: string
+      notes:
+        type: string
+      title:
+        type: string
+    type: object
+  responses.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API documentation for Mindshelf
+  title: Mindshelf API
+  version: "1.0"
+paths:
+  /api/group/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a group
+      tags:
+      - group
+  /api/task/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated tasks
+      tags:
+      - task
+  /api/task/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new task
+      tags:
+      - task
+  /api/task/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Delete task
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/requests.DeleteTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a task
+      tags:
+      - task
+  /api/user/delete:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete authenticated user
+      tags:
+      - user
+  /api/user/update:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update authenticated user
+      tags:
+      - user
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/requests.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login and receive auth token
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /ws/accept_friend_request:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Friend request payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.FriendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Accept friend request over WebSocket
+      tags:
+      - websocket
+  /ws/get_chats:
+    get:
+      consumes:
+      - application/json
+      description: Send event `get_chats` (no payload) to receive chats list (friend
+        + last message).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get chats list over WebSocket
+      tags:
+      - websocket
+  /ws/get_conversation:
+    post:
+      consumes:
+      - application/json
+      description: Send event `get_conversation` with `with_user_id` to receive conversation
+        history.
+      parameters:
+      - description: Get conversation payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.GetChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get conversation messages over WebSocket
+      tags:
+      - websocket
+  /ws/get_friends:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get friends list over WebSocket
+      tags:
+      - websocket
+  /ws/reject_friend_request:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Friend request payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.FriendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reject friend request over WebSocket
+      tags:
+      - websocket
+  /ws/send_friend_request:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Friend request payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.FriendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send friend request over WebSocket
+      tags:
+      - websocket
+  /ws/send_message:
+    post:
+      consumes:
+      - application/json
+      description: Connect to the WebSocket, send an event named `send_message` with
+        this payload. Server will broadcast `message_received` to recipient.
+      parameters:
+      - description: Send message payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SendChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send a chat message over WebSocket
+      tags:
+      - websocket
+schemes:
+- http
+- https
+swagger: "2.0"

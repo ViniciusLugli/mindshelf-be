@@ -1,3 +1,9 @@
+// @title Mindshelf API
+// @version 1.0
+// @description API documentation for Mindshelf
+// @host localhost:8080
+// @BasePath /api
+// @schemes http https
 package main
 
 import (
@@ -11,6 +17,10 @@ import (
 	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	_ "github.com/ViniciusLugli/mindshelf/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -88,6 +98,12 @@ func main() {
 
 	wsHandler.NewFriendHandlers(userService).Register(wsRouter)
 	wsHandler.NewChatHandler(chatService, hub)
+
+	// Swagger
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// WebSocket docs endpoints (for Swagger UI only)
+	wsHandler.RegisterWebsocketDocs(router)
 
 	router.Run()
 }

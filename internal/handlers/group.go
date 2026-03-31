@@ -19,6 +19,18 @@ func NewGroupHandler(service *services.GroupService) *GroupHandler {
 	return &GroupHandler{service: service}
 }
 
+// Create godoc
+// @Summary Create a group
+// @Tags group
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param group body requests.CreateGroupRequest true "Group data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/create [post]
 func (h *GroupHandler) Create(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -125,6 +137,18 @@ func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 		return
 	}
 
+	// Delete godoc
+	// @Summary Delete a group
+	// @Tags group
+	// @Security ApiKeyAuth
+	// @Accept json
+	// @Produce json
+	// @Param body body requests.DeleteGroupRequest true "Delete group"
+	// @Success 204 {string} string
+	// @Failure 400 {object} map[string]string
+	// @Failure 401 {object} map[string]string
+	// @Failure 500 {object} map[string]string
+	// @Router /api/group/delete [post]
 	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -19,6 +19,18 @@ func NewTaskHandler(service *services.TaskService) *TaskHandler {
 	return &TaskHandler{service: service}
 }
 
+// CreateTask godoc
+// @Summary Create a new task
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param task body requests.CreateTaskRequest true "Task data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/create [post]
 func (h *TaskHandler) Create(c *gin.Context) {
 	var dto requests.CreateTaskRequest
 	if err := c.ShouldBind(&dto); err != nil {
@@ -69,6 +81,18 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	})
 }
 
+// DeleteTask godoc
+// @Summary Delete a task
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param body body requests.DeleteTaskRequest true "Delete task"
+// @Success 204 {string} string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/delete [delete]
 func (h *TaskHandler) Delete(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -133,6 +157,19 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
+// GetAllTasks godoc
+// @Summary Get paginated tasks
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param page query int false "page"
+// @Param limit query int false "limit"
+// @Success 200 {object} responses.PaginatedTaskResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/all [get]
 func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
