@@ -6,7 +6,6 @@ CREATE TABLE users(
   avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  deleted BOOLEAN DEFAULT FALSE,
   deleted_at TIMESTAMPTZ
 );
 
@@ -16,7 +15,6 @@ CREATE TABLE groups(
   group_color TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  deleted BOOLEAN DEFAULT FALSE,
   deleted_at TIMESTAMPTZ,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE
 );
@@ -29,7 +27,6 @@ CREATE TABLE tasks(
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  deleted BOOLEAN DEFAULT FALSE,
   deleted_at TIMESTAMPTZ,
   group_id UUID REFERENCES groups(id) ON DELETE CASCADE
 );

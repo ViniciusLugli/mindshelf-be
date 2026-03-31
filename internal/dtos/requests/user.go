@@ -38,6 +38,10 @@ type UpdateUserRequest struct {
 	Password string `json:"password"`
 }
 
+type FriendRequest struct {
+	FriendID uuid.UUID `json:"friend_id" binding:"required,uuid"`
+}
+
 func (d *CreateUserRequest) ToModel() models.User {
 	return models.User{
 		Name:     d.Name,

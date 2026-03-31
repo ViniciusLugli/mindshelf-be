@@ -85,3 +85,29 @@ func (s *UserService) GetAllUsersByName(dto requests.GetAllUsersByName) (respons
 	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
 	return responses.NewPaginatedResponse(users, responses.NewUserResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
 }
+
+func (s *UserService) SendFriendRequest(userID uuid.UUID, dto requests.FriendRequest) error {
+	return s.repo.SendFriendRequest(userID, dto.FriendID)
+}
+
+func (s *UserService) AcceptFriendRequest(userID uuid.UUID, dto requests.FriendRequest) error {
+	return s.repo.AcceptFriendRequest(userID, dto.FriendID)
+}
+
+func (s *UserService) RejectFriendRequest(userID uuid.UUID, dto requests.FriendRequest) error {
+	return s.repo.RejectFriendRequest(userID, dto.FriendID)
+}
+
+func (s *UserService) GetFriends(userID uuid.UUID) ([]responses.UserResponse, error) {
+	friends, err := s.repo.GetFriends(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	friendsDto := make([]responses.UserResponse, len(friends))
+	for i, friend := range friends {
+		friendsDto[i] = responses.NewUserResponse(friend)
+	}
+
+	return friendsDto, nil
+}

@@ -19,9 +19,10 @@ type AuthResponse struct {
 
 func NewUserResponse(user models.User) UserResponse {
 	return UserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		AvatarURL: user.AvatarURL,
 	}
 }
 

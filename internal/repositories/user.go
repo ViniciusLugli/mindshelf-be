@@ -75,3 +75,43 @@ func (r *UserRepository) GetAll(limit, offset int) ([]models.User, int64, error)
 
 	return users, count, nil
 }
+
+func (r *UserRepository) SendFriendRequest(UserID, friendID uuid.UUID) error {
+	friendship := models.UserFriend{
+		UserID:   UserID,
+		FriendID: friendID,
+		Status:   "pending",
+	}
+
+	return r.db.Create(&friendship).Error
+}
+
+func (r *UserRepository) AcceptFriendRequest(userID, friendID uuid.UUID) error {
+	return r.db.Model(&models.UserFriend{}).
+		Where("user_id = ? AND friend_id = ?", friendID, userID).
+		Update("status", "accepted").Error
+}
+
+func (r *UserRepository) RejectFriendRequest(userID, friendID uuid.UUID) error {
+	return r.db.Model(&models.UserFriend{}).
+		Where("user_id = ? AND friend_id = ?", friendID, userID).
+		Update("status", "rejected").Error
+}
+
+func (r *UserRepository) RemoveFriend(userID, friendID uuid.UUID) error {
+	// Inverted OR because friendship may be created in whatever direction
+	return r.db.Where(
+		"(user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)",
+		userID, friendID, friendID, userID).
+		Delete(&models.UserFriend{}).Error
+}
+
+func (r *UserRepository) GetFriends(userID uuid.UUID) ([]models.User, error) {
+	var friends []models.User
+	err := r.db.
+		Joins("JOIN user_friends ON user_friends.friends_id = users.id OR user_friends.user_id = users.id").
+		Where("(user_friends.user_id = ? OR user_friends.friend_id = ?) AND user_friends.status = 'accepted' AND users.id != ?",
+			userID, userID, userID).
+		Find(&friends).Error
+	return friends, err
+}

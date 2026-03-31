@@ -55,6 +55,14 @@ func main() {
 	}
 
 	{
+		friendRoute := protected.Group("/friend")
+		friendRoute.GET("/", userHandler.GetFriends)
+		friendRoute.POST("/send", userHandler.SendFriendRequest)
+		friendRoute.POST("/accept", userHandler.AcceptFriendRequest)
+		friendRoute.POST("/reject", userHandler.RejectFriendRequest)
+	}
+
+	{
 		groupRoute := protected.Group("/group")
 		groupRoute.GET("/", groupHandler.GetAllGroups)
 		groupRoute.GET("/:id", groupHandler.GetGroupByID)

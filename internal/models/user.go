@@ -7,4 +7,5 @@ type User struct {
 	Password  string `gorm:"not null"`
 	AvatarURL string
 	Groups    []Group
+	Friends   []UserFriend `gorm:"foreignKey:UserID"`
 }
