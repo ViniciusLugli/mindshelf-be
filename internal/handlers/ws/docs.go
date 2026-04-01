@@ -3,8 +3,11 @@ package wsHandler
 import (
 	"net/http"
 
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/gin-gonic/gin"
 )
+
+var _ requests.SendChatRequest
 
 func RegisterWebsocketDocs(r *gin.Engine) {
 	r.POST("/ws/send_message", SendMessageDoc)

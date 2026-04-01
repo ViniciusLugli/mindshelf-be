@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ import (
 type TaskHandler struct {
 	service *services.TaskService
 }
+
+var _ responses.TaskResponse
 
 func NewTaskHandler(service *services.TaskService) *TaskHandler {
 	return &TaskHandler{service: service}
@@ -52,6 +55,18 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	})
 }
 
+// UpdateTask godoc
+// @Summary Update a task
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param task body requests.UpdateTaskRequest true "Task data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/update [patch]
 func (h *TaskHandler) Update(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -120,6 +135,19 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// GetTask godoc
+// @Summary Get task by ID
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param id query string true "Task ID"
+// @Success 200 {object} responses.TaskResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/ [get]
 func (h *TaskHandler) GetTask(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -199,6 +227,20 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// GetAllTasksByTitle godoc
+// @Summary Get paginated tasks by title
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param title path string true "Task title"
+// @Param page query int true "page"
+// @Param limit query int true "limit"
+// @Success 200 {object} responses.PaginatedTaskResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/{title} [get]
 func (h *TaskHandler) GetAllTasksByTitle(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {

@@ -1,13 +1,13 @@
 basePath: /api
 definitions:
-  requests.CreateGroupRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  requests.CreateTaskRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest:
     properties:
       group_id:
         type: string
@@ -19,7 +19,7 @@ definitions:
     - group_id
     - title
     type: object
-  requests.CreateUserRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest:
     properties:
       email:
         type: string
@@ -32,26 +32,26 @@ definitions:
     - name
     - password
     type: object
-  requests.DeleteTaskRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest:
     properties:
       id:
         type: string
     required:
     - id
     type: object
-  requests.FriendRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest:
     properties:
       friend_id:
         type: string
     required:
     - friend_id
     type: object
-  requests.GetChatRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest:
     properties:
       with_user_id:
         type: string
     type: object
-  requests.LoginRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest:
     properties:
       email:
         type: string
@@ -61,14 +61,35 @@ definitions:
     - email
     - password
     type: object
-  requests.SendChatRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest:
     properties:
       content:
         type: string
       to_user_id:
         type: string
     type: object
-  requests.UpdateUserRequest:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest:
+    properties:
+      id:
+        type: string
+      notes:
+        type: string
+      title:
+        type: string
+    required:
+    - id
+    type: object
+  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest:
     properties:
       email:
         type: string
@@ -77,18 +98,27 @@ definitions:
       password:
         type: string
     type: object
-  responses.AuthResponse:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse:
     properties:
       token:
         type: string
       user:
-        $ref: '#/definitions/responses.UserResponse'
+        $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
     type: object
-  responses.PaginatedTaskResponse:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/responses.TaskResponse'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse'
         type: array
       limit:
         type: integer
@@ -99,7 +129,37 @@ definitions:
       total_pages:
         type: integer
     type: object
-  responses.TaskResponse:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse:
     properties:
       group_color:
         type: string
@@ -112,7 +172,7 @@ definitions:
       title:
         type: string
     type: object
-  responses.UserResponse:
+  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse:
     properties:
       avatar_url:
         type: string
@@ -130,6 +190,51 @@ info:
   title: Mindshelf API
   version: "1.0"
 paths:
+  /api/group/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated groups
+      tags:
+      - group
   /api/group/create:
     post:
       consumes:
@@ -140,7 +245,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateGroupRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest'
       produces:
       - application/json
       responses:
@@ -173,6 +278,279 @@ paths:
       summary: Create a group
       tags:
       - group
+  /api/group/delete:
+    post:
+      parameters:
+      - description: Group ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a group
+      tags:
+      - group
+  /api/group/id/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get group by ID
+      tags:
+      - group
+  /api/group/name/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated groups by name
+      tags:
+      - group
+  /api/group/update:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a group
+      tags:
+      - group
+  /api/task/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get task by ID
+      tags:
+      - task
+  /api/task/{title}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task title
+        in: path
+        name: title
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated tasks by title
+      tags:
+      - task
   /api/task/all:
     get:
       consumes:
@@ -192,7 +570,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.PaginatedTaskResponse'
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse'
         "400":
           description: Bad Request
           schema:
@@ -226,7 +604,7 @@ paths:
         name: task
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateTaskRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest'
       produces:
       - application/json
       responses:
@@ -269,7 +647,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/requests.DeleteTaskRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest'
       produces:
       - application/json
       responses:
@@ -300,6 +678,148 @@ paths:
       summary: Delete a task
       tags:
       - task
+  /api/task/update:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a task
+      tags:
+      - task
+  /api/user/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: query
+        name: id
+        type: string
+      - description: User email
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by id or email
+      tags:
+      - user
+  /api/user/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated users by name
+      tags:
+      - user
   /api/user/delete:
     delete:
       produces:
@@ -336,7 +856,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/requests.UpdateUserRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -379,14 +899,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/requests.LoginRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/responses.AuthResponse'
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -412,14 +932,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateUserRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/responses.AuthResponse'
+            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -445,7 +965,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/requests.FriendRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -488,7 +1008,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/requests.GetChatRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest'
       produces:
       - application/json
       responses:
@@ -527,7 +1047,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/requests.FriendRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -550,7 +1070,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/requests.FriendRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -575,7 +1095,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/requests.SendChatRequest'
+          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest'
       produces:
       - application/json
       responses:

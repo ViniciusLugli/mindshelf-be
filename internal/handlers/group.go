@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ import (
 type GroupHandler struct {
 	service *services.GroupService
 }
+
+var _ responses.GroupResponse
 
 func NewGroupHandler(service *services.GroupService) *GroupHandler {
 	return &GroupHandler{service: service}
@@ -61,6 +64,18 @@ func (h *GroupHandler) Create(c *gin.Context) {
 	})
 }
 
+// Update godoc
+// @Summary Update a group
+// @Tags group
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param group body requests.UpdateGroupRequest true "Group data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/update [patch]
 func (h *GroupHandler) Update(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -91,6 +106,17 @@ func (h *GroupHandler) Update(c *gin.Context) {
 	})
 }
 
+// Delete godoc
+// @Summary Delete a group
+// @Tags group
+// @Security ApiKeyAuth
+// @Produce json
+// @Param id query string true "Group ID"
+// @Success 204 {string} string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/delete [post]
 func (h *GroupHandler) Delete(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -119,6 +145,20 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// GetAllGroupsByName godoc
+// @Summary Get paginated groups by name
+// @Tags group
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param name path string true "Group name"
+// @Param page query int true "page"
+// @Param limit query int true "limit"
+// @Success 200 {object} responses.PaginatedGroupResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/name/{name} [get]
 func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -136,19 +176,6 @@ func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 		})
 		return
 	}
-
-	// Delete godoc
-	// @Summary Delete a group
-	// @Tags group
-	// @Security ApiKeyAuth
-	// @Accept json
-	// @Produce json
-	// @Param body body requests.DeleteGroupRequest true "Delete group"
-	// @Success 204 {string} string
-	// @Failure 400 {object} map[string]string
-	// @Failure 401 {object} map[string]string
-	// @Failure 500 {object} map[string]string
-	// @Router /api/group/delete [post]
 	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -165,6 +192,19 @@ func (h *GroupHandler) GetAllGroupsByName(c *gin.Context) {
 	c.JSON(http.StatusOK, groups)
 }
 
+// GetGroupByID godoc
+// @Summary Get group by ID
+// @Tags group
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "Group ID"
+// @Success 200 {object} responses.GroupResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/id/{id} [get]
 func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -203,6 +243,19 @@ func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 	c.JSON(http.StatusOK, group)
 }
 
+// GetAllGroups godoc
+// @Summary Get paginated groups
+// @Tags group
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param page query int true "page"
+// @Param limit query int true "limit"
+// @Success 200 {object} responses.PaginatedGroupResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/group/ [get]
 func (h *GroupHandler) GetAllGroups(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -214,7 +267,7 @@ func (h *GroupHandler) GetAllGroups(c *gin.Context) {
 
 	var dto requests.GetAllGroups
 
-	if err := c.ShouldBind(dto); err != nil {
+	if err := c.ShouldBind(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

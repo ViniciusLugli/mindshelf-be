@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ import (
 type UserHandler struct {
 	service *services.UserService
 }
+
+var _ responses.UserResponse
 
 func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{service: service}
@@ -86,6 +89,20 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// GetUser godoc
+// @Summary Get user by id or email
+// @Tags user
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param id query string false "User ID"
+// @Param email query string false "User email"
+// @Success 200 {object} responses.UserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/user/ [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	var dto requests.GetUser
 	if err := c.ShouldBind(&dto); err != nil {
@@ -149,6 +166,20 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// GetAllUsersByName godoc
+// @Summary Get paginated users by name
+// @Tags user
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param name path string true "User name"
+// @Param page query int true "page"
+// @Param limit query int true "limit"
+// @Success 200 {object} responses.PaginatedUserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/user/{name} [get]
 func (h *UserHandler) GetAllUsersByName(c *gin.Context) {
 	var dto requests.GetAllUsersByName
 

@@ -8,6 +8,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/handlers"
 	wsHandler "github.com/ViniciusLugli/mindshelf/internal/handlers/ws"
@@ -71,8 +72,8 @@ func main() {
 	{
 		groupRoute := protected.Group("/group")
 		groupRoute.GET("/", groupHandler.GetAllGroups)
-		groupRoute.GET("/:id", groupHandler.GetGroupByID)
-		groupRoute.GET("/:name", groupHandler.GetAllGroupsByName)
+		groupRoute.GET("/id/:id", groupHandler.GetGroupByID)
+		groupRoute.GET("/name/:name", groupHandler.GetAllGroupsByName)
 		groupRoute.POST("/create", groupHandler.Create)
 		groupRoute.PATCH("/update", groupHandler.Update)
 		groupRoute.POST("/delete", groupHandler.Delete)
@@ -100,6 +101,9 @@ func main() {
 	wsHandler.NewChatHandler(chatService, hub)
 
 	// Swagger
+	router.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// WebSocket docs endpoints (for Swagger UI only)

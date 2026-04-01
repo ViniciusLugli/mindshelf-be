@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,8 @@ import (
 type AuthHandler struct {
 	service *services.AuthService
 }
+
+var _ responses.AuthResponse
 
 func NewAuthHandler(service *services.AuthService) *AuthHandler {
 	return &AuthHandler{service: service}
