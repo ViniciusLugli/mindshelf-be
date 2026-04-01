@@ -31,6 +31,10 @@ func CheckPassword(password string, hash string) bool {
 }
 
 func (s *AuthService) Register(dto requests.CreateUserRequest) (responses.AuthResponse, error) {
+	if err := utils.ValidateJWTConfig(); err != nil {
+		return responses.AuthResponse{}, err
+	}
+
 	hashedPassword, err := HashPassword(dto.Password)
 	if err != nil {
 		return responses.AuthResponse{}, err
@@ -61,7 +65,7 @@ func (s *AuthService) Login(dto requests.LoginRequest) (responses.AuthResponse, 
 		return responses.AuthResponse{}, err
 	}
 
-	if CheckPassword(user.Password, dto.Password) {
+	if !CheckPassword(dto.Password, user.Password) {
 		return responses.AuthResponse{}, errors.New("Invalid Email or Password")
 	}
 

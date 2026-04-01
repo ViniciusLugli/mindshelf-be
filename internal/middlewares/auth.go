@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -15,6 +16,14 @@ func Auth() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			slog.Warn(
+				"unauthorized request",
+				"request_id", GetRequestID(c),
+				"reason", "missing or malformed authorization header",
+				"method", c.Request.Method,
+				"path", c.Request.URL.Path,
+			)
+
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "empty token",
 			})
@@ -25,6 +34,14 @@ func Auth() gin.HandlerFunc {
 
 		claims, err := utils.ValidateToken(tokenStr)
 		if err != nil {
+			slog.Warn(
+				"unauthorized request",
+				"request_id", GetRequestID(c),
+				"reason", "invalid token",
+				"method", c.Request.Method,
+				"path", c.Request.URL.Path,
+			)
+
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid token",
 			})

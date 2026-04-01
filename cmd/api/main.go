@@ -7,14 +7,16 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/ViniciusLugli/mindshelf/internal/handlers"
 	wsHandler "github.com/ViniciusLugli/mindshelf/internal/handlers/ws"
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
+	"github.com/ViniciusLugli/mindshelf/internal/utils/logger"
 	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -25,14 +27,17 @@ import (
 )
 
 func main() {
+	appLogger := logger.New("mindshelf-api")
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		appLogger.Warn("failed to load .env file", "error", err)
 	}
 
 	db, err := repositories.ConnectDB()
 	if err != nil {
-		log.Fatal(err)
+		appLogger.Error("failed to connect to database", "error", err)
+		os.Exit(1)
 	}
 
 	userRepository := repositories.NewUserRepository(db)
@@ -50,7 +55,10 @@ func main() {
 	taskService := services.NewTaskService(taskRepository)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(middlewares.RequestID())
+	router.Use(middlewares.RequestLogger(appLogger))
+	router.Use(middlewares.Recovery(appLogger))
 
 	router.POST("/register", authHandler.Register)
 	router.POST("/login", authHandler.Login)
@@ -109,5 +117,19 @@ func main() {
 	// WebSocket docs endpoints (for Swagger UI only)
 	wsHandler.RegisterWebsocketDocs(router)
 
-	router.Run()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	appLogger.Info(
+		"starting API server",
+		"gin_mode", gin.Mode(),
+		"port", port,
+	)
+
+	if err := router.Run(fmt.Sprintf(":%s", port)); err != nil {
+		appLogger.Error("failed to run API server", "error", err)
+		os.Exit(1)
+	}
 }
