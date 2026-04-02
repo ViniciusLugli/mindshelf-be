@@ -52,7 +52,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.PaginatedGroupResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse"
                         }
                     },
                     "400": {
@@ -109,7 +109,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateGroupRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest"
                         }
                     }
                 ],
@@ -243,7 +243,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.GroupResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse"
                         }
                     },
                     "400": {
@@ -329,7 +329,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.PaginatedGroupResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse"
                         }
                     },
                     "400": {
@@ -386,7 +386,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.UpdateGroupRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest"
                         }
                     }
                 ],
@@ -460,7 +460,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.TaskResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse"
                         }
                     },
                     "400": {
@@ -537,7 +537,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.PaginatedTaskResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse"
                         }
                     },
                     "400": {
@@ -594,7 +594,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateTaskRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest"
                         }
                     }
                 ],
@@ -662,7 +662,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.DeleteTaskRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest"
                         }
                     }
                 ],
@@ -727,7 +727,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.UpdateTaskRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest"
                         }
                     }
                 ],
@@ -815,7 +815,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.PaginatedTaskResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse"
                         }
                     },
                     "400": {
@@ -883,7 +883,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.UserResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse"
                         }
                     },
                     "400": {
@@ -991,7 +991,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.UpdateUserRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest"
                         }
                     }
                 ],
@@ -1079,7 +1079,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.PaginatedUserResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse"
                         }
                     },
                     "400": {
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.LoginRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest"
                         }
                     }
                 ],
@@ -1139,7 +1139,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.AuthResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse"
                         }
                     },
                     "400": {
@@ -1182,7 +1182,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateUserRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest"
                         }
                     }
                 ],
@@ -1190,7 +1190,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/responses.AuthResponse"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse"
                         }
                     },
                     "400": {
@@ -1233,7 +1233,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.FriendRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest"
                         }
                     }
                 ],
@@ -1296,7 +1296,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.GetChatRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest"
                         }
                     }
                 ],
@@ -1358,7 +1358,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.MarkMessagesReadRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.MarkMessagesReadRequest"
                         }
                     }
                 ],
@@ -1394,7 +1394,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.FriendRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest"
                         }
                     }
                 ],
@@ -1430,7 +1430,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.FriendRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest"
                         }
                     }
                 ],
@@ -1467,7 +1467,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.SendChatRequest"
+                            "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest"
                         }
                     }
                 ],
@@ -1486,18 +1486,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "requests.CreateGroupRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest": {
             "type": "object",
             "required": [
+                "color",
                 "name"
             ],
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 }
             }
         },
-        "requests.CreateTaskRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest": {
             "type": "object",
             "required": [
                 "group_id",
@@ -1515,7 +1519,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.CreateUserRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1534,7 +1538,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.DeleteTaskRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest": {
             "type": "object",
             "required": [
                 "id"
@@ -1545,7 +1549,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.FriendRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest": {
             "type": "object",
             "required": [
                 "friend_id"
@@ -1556,7 +1560,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.GetChatRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest": {
             "type": "object",
             "properties": {
                 "with_user_id": {
@@ -1564,7 +1568,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.LoginRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1579,7 +1583,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.MarkMessagesReadRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.MarkMessagesReadRequest": {
             "type": "object",
             "properties": {
                 "up_to_message_id": {
@@ -1590,7 +1594,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.SendChatRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest": {
             "type": "object",
             "properties": {
                 "content": {
@@ -1601,7 +1605,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.UpdateGroupRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest": {
             "type": "object",
             "required": [
                 "id",
@@ -1616,7 +1620,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.UpdateTaskRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest": {
             "type": "object",
             "required": [
                 "id"
@@ -1633,7 +1637,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.UpdateUserRequest": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1647,18 +1651,18 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.AuthResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/responses.UserResponse"
+                    "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse"
                 }
             }
         },
-        "responses.GroupResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse": {
             "type": "object",
             "properties": {
                 "color": {
@@ -1672,13 +1676,13 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.PaginatedGroupResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/responses.GroupResponse"
+                        "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse"
                     }
                 },
                 "limit": {
@@ -1695,13 +1699,13 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.PaginatedTaskResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/responses.TaskResponse"
+                        "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse"
                     }
                 },
                 "limit": {
@@ -1718,13 +1722,13 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.PaginatedUserResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/responses.UserResponse"
+                        "$ref": "#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse"
                     }
                 },
                 "limit": {
@@ -1741,7 +1745,7 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.TaskResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse": {
             "type": "object",
             "properties": {
                 "group_color": {
@@ -1761,7 +1765,7 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.UserResponse": {
+        "github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse": {
             "type": "object",
             "properties": {
                 "avatar_url": {
