@@ -80,8 +80,22 @@ func (s *MessageService) GetChats(userID uuid.UUID) ([]responses.ChatResponse, e
 		out[i] = responses.ChatResponse{
 			Friend:      responses.NewUserResponse(ssum.Friend),
 			LastMessage: responses.NewMessageResponse(ssum.LastMessage),
+			UnreadCount: ssum.UnreadCount,
 		}
 	}
 
 	return out, nil
+}
+
+func (s *MessageService) MarkMessagesAsRead(userID uuid.UUID, dto requests.MarkMessagesReadRequest) (responses.MarkMessagesReadResponse, error) {
+	updated, readAt, err := s.repo.MarkConversationAsRead(userID, dto.WithUserID, dto.UpToMessageID)
+	if err != nil {
+		return responses.MarkMessagesReadResponse{}, err
+	}
+
+	return responses.MarkMessagesReadResponse{
+		WithUserID: dto.WithUserID,
+		Updated:    updated,
+		ReadAt:     readAt,
+	}, nil
 }

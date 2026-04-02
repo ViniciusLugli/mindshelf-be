@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_messages_receiver_sender_read_created;

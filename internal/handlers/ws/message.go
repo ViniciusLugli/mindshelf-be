@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
+	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
 	ws "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
@@ -22,6 +23,7 @@ func (h *ChatHandler) Register(r *ws.Router) {
 	r.On("send_message", h.SendMessage)
 	r.On("get_conversation", h.GetConversation)
 	r.On("get_chats", h.GetChats)
+	r.On("mark_messages_read", h.MarkMessagesRead)
 }
 
 func (h *ChatHandler) SendMessage(cl *ws.Client, payload json.RawMessage) {
@@ -42,7 +44,6 @@ func (h *ChatHandler) SendMessage(cl *ws.Client, payload json.RawMessage) {
 	h.hub.SendToUser(dto.ToUserID, "message_received", msg)
 }
 
-// Buscar histórico de conversa com um usuário
 func (h *ChatHandler) GetConversation(cl *ws.Client, payload json.RawMessage) {
 	var dto requests.GetChatRequest
 	if err := json.Unmarshal(payload, &dto); err != nil {
@@ -67,4 +68,30 @@ func (h *ChatHandler) GetChats(cl *ws.Client, _ json.RawMessage) {
 	}
 
 	cl.Send("get_chats", chats)
+}
+
+func (h *ChatHandler) MarkMessagesRead(cl *ws.Client, payload json.RawMessage) {
+	var dto requests.MarkMessagesReadRequest
+	if err := json.Unmarshal(payload, &dto); err != nil {
+		cl.SendError("mark_messages_read", "invalid payload")
+		return
+	}
+
+	result, err := h.msgService.MarkMessagesAsRead(cl.UserID, dto)
+	if err != nil {
+		cl.SendError("mark_messages_read", err.Error())
+		return
+	}
+
+	cl.Send("mark_messages_read", result)
+
+	if result.Updated > 0 {
+		h.hub.SendToUser(dto.WithUserID, "messages_read", responses.MessagesReadEvent{
+			ByUserID:      cl.UserID,
+			WithUserID:    dto.WithUserID,
+			Updated:       result.Updated,
+			ReadAt:        result.ReadAt,
+			UpToMessageID: dto.UpToMessageID,
+		})
+	}
 }

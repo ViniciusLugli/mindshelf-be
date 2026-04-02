@@ -106,7 +106,9 @@ func main() {
 	wsRouter := util.NewRouter()
 
 	wsHandler.NewFriendHandlers(userService).Register(wsRouter)
-	wsHandler.NewChatHandler(chatService, hub)
+	wsHandler.NewChatHandler(chatService, hub).Register(wsRouter)
+	websocketHandler := handlers.NewWSHandler(hub, wsRouter)
+	protected.GET("/ws", websocketHandler.Handle)
 
 	// Swagger
 	router.GET("/swagger", func(c *gin.Context) {

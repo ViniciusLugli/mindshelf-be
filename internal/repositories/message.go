@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -52,6 +54,7 @@ func (r *MessageRepository) GetMessages(userID, correspondentID uuid.UUID, page,
 type ChatSummary struct {
 	Friend      models.User
 	LastMessage models.Message
+	UnreadCount int64
 }
 
 func (r *MessageRepository) GetConversation(userID, withUserID uuid.UUID) ([]models.Message, error) {
@@ -85,8 +88,44 @@ func (r *MessageRepository) GetChats(userID uuid.UUID) ([]ChatSummary, error) {
 			continue
 		}
 
-		summaries = append(summaries, ChatSummary{Friend: friend, LastMessage: last})
+		var unreadCount int64
+		if err := r.db.Model(&models.Message{}).
+			Where("sender_id = ? AND receiver_id = ? AND read_at IS NULL", row.CorrespondentID, userID).
+			Count(&unreadCount).Error; err != nil {
+			continue
+		}
+
+		summaries = append(summaries, ChatSummary{Friend: friend, LastMessage: last, UnreadCount: unreadCount})
 	}
 
 	return summaries, nil
+}
+
+func (r *MessageRepository) MarkConversationAsRead(readerID, withUserID uuid.UUID, upToMessageID *uuid.UUID) (int64, *time.Time, error) {
+	query := r.db.Model(&models.Message{}).
+		Where("sender_id = ? AND receiver_id = ? AND read_at IS NULL", withUserID, readerID)
+
+	if upToMessageID != nil {
+		var cutoff models.Message
+		err := r.db.Select("created_at").
+			Where("id = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?))",
+				*upToMessageID,
+				readerID, withUserID,
+				withUserID, readerID,
+			).
+			First(&cutoff).Error
+		if err != nil {
+			return 0, nil, err
+		}
+
+		query = query.Where("created_at <= ?", cutoff.CreatedAt)
+	}
+
+	now := time.Now().UTC()
+	result := query.Update("read_at", now)
+	if result.Error != nil {
+		return 0, nil, result.Error
+	}
+
+	return result.RowsAffected, &now, nil
 }

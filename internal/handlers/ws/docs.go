@@ -13,6 +13,7 @@ func RegisterWebsocketDocs(r *gin.Engine) {
 	r.POST("/ws/send_message", SendMessageDoc)
 	r.POST("/ws/get_conversation", GetConversationDoc)
 	r.GET("/ws/get_chats", GetChatsDoc)
+	r.POST("/ws/mark_messages_read", MarkMessagesReadDoc)
 
 	r.POST("/ws/send_friend_request", SendFriendRequestDoc)
 	r.POST("/ws/accept_friend_request", AcceptFriendRequestDoc)
@@ -56,6 +57,19 @@ func GetConversationDoc(c *gin.Context) {
 // @Router /ws/get_chats [get]
 func GetChatsDoc(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Docs-only endpoint. Use websocket and send 'get_chats' event."})
+}
+
+// MarkMessagesReadDoc godoc
+// @Summary Mark messages as read over WebSocket
+// @Description Send event `mark_messages_read` with `with_user_id` and optional `up_to_message_id` to set read_at in conversation.
+// @Tags websocket
+// @Accept json
+// @Produce json
+// @Param payload body requests.MarkMessagesReadRequest true "Mark messages as read payload"
+// @Success 200 {object} map[string]string
+// @Router /ws/mark_messages_read [post]
+func MarkMessagesReadDoc(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Docs-only endpoint. Use websocket and send 'mark_messages_read' event."})
 }
 
 // Friend requests
