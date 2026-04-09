@@ -56,6 +56,7 @@ func main() {
 	taskHandler := handlers.NewTaskHandler(taskService)
 
 	router := gin.New()
+	router.Use(gin.Logger())
 	router.Use(middlewares.RequestID())
 	router.Use(middlewares.RequestLogger(appLogger))
 	router.Use(middlewares.Recovery(appLogger))

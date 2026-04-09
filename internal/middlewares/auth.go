@@ -11,15 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+var authCookieNames = []string{"token", "auth_token", "access_token", "jwt"}
+
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		tokenStr, err := extractToken(c)
+		if err != nil {
 			slog.Warn(
 				"unauthorized request",
 				"request_id", GetRequestID(c),
-				"reason", "missing or malformed authorization header",
+				"reason", err.Error(),
 				"method", c.Request.Method,
 				"path", c.Request.URL.Path,
 			)
@@ -29,8 +30,6 @@ func Auth() gin.HandlerFunc {
 			})
 			return
 		}
-
-		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := utils.ValidateToken(tokenStr)
 		if err != nil {
@@ -48,9 +47,41 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("userID", claims.ID)
+		c.Set("userID", claims.UserID)
 		c.Next()
 	}
+}
+
+func extractToken(c *gin.Context) (string, error) {
+	if token := normalizeToken(c.GetHeader("Authorization")); token != "" {
+		return token, nil
+	}
+
+	for _, cookieName := range authCookieNames {
+		cookieValue, err := c.Cookie(cookieName)
+		if err != nil {
+			continue
+		}
+
+		if token := normalizeToken(cookieValue); token != "" {
+			return token, nil
+		}
+	}
+
+	return "", errors.New("missing authorization token")
+}
+
+func normalizeToken(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+
+	if strings.HasPrefix(strings.ToLower(raw), "bearer ") {
+		return strings.TrimSpace(raw[7:])
+	}
+
+	return raw
 }
 
 func GetAuthenticatedUserID(c *gin.Context) (uuid.UUID, error) {
