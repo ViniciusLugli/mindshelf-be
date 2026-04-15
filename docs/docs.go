@@ -1271,6 +1271,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/ws": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Open a WebSocket connection on ` + "`" + `/api/ws` + "`" + ` using the same authentication used by protected HTTP routes. After connecting, every client message must use the envelope ` + "`" + `{\"action\":\"event_name\",\"payload\":{...}}` + "`" + `. Every server response uses the envelope ` + "`" + `{\"action\":\"event_name\",\"success\":true|false,\"data\":...,\"error\":\"...\"}` + "`" + `.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "websocket"
+                ],
+                "summary": "Connect to the authenticated WebSocket",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "consumes": [
@@ -1398,6 +1423,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Send ` + "`" + `{\"action\":\"accept_friend_request\",\"payload\":{\"friend_id\":\"...\"}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The authenticated user accepts a previously received pending invitation from ` + "`" + `friend_id` + "`" + `. The server replies with ` + "`" + `accept_friend_request` + "`" + ` and a confirmation message.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1423,10 +1449,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.StatusMessageResponse"
                         }
                     }
                 }
@@ -1439,7 +1462,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Send event ` + "`" + `get_chats` + "`" + ` (no payload) to receive chats list (friend + last message).",
+                "description": "Send ` + "`" + `{\"action\":\"get_chats\",\"payload\":null}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The server responds to the same client with the ` + "`" + `get_chats` + "`" + ` event. The event ` + "`" + `data` + "`" + ` contains ` + "`" + `[]responses.ChatResponse` + "`" + ` with friend info, last message, and unread count.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1449,14 +1472,14 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Get chats list over WebSocket",
+                "summary": "WebSocket event: get_chats",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.ChatResponse"
                             }
                         }
                     }
@@ -1470,7 +1493,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Send event ` + "`" + `get_conversation` + "`" + ` with ` + "`" + `with_user_id` + "`" + ` to receive conversation history.",
+                "description": "Send ` + "`" + `{\"action\":\"get_conversation\",\"payload\":{\"with_user_id\":\"...\"}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The server responds to the same client with the ` + "`" + `get_conversation` + "`" + ` event. The event ` + "`" + `data` + "`" + ` contains the full ordered conversation as ` + "`" + `[]responses.MessageResponse` + "`" + `.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1480,7 +1503,7 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Get conversation messages over WebSocket",
+                "summary": "WebSocket event: get_conversation",
                 "parameters": [
                     {
                         "description": "Get conversation payload",
@@ -1496,9 +1519,9 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.MessageResponse"
                             }
                         }
                     }
@@ -1512,6 +1535,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Send ` + "`" + `{\"action\":\"get_friends\",\"payload\":null}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The server responds with ` + "`" + `get_friends` + "`" + ` and ` + "`" + `[]responses.UserResponse` + "`" + ` in ` + "`" + `data` + "`" + `.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1526,9 +1550,40 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.UserResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/get_pending_friend_requests": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Send ` + "`" + `{\"action\":\"get_pending_friend_requests\",\"payload\":null}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The server responds with ` + "`" + `get_pending_friend_requests` + "`" + ` and ` + "`" + `[]responses.ReceivedFriendRequestResponse` + "`" + ` in ` + "`" + `data` + "`" + `, listing only pending invitations received by the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "websocket"
+                ],
+                "summary": "WebSocket event: get_pending_friend_requests",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.ReceivedFriendRequestResponse"
                             }
                         }
                     }
@@ -1542,7 +1597,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Send event ` + "`" + `mark_messages_read` + "`" + ` with ` + "`" + `with_user_id` + "`" + ` and optional ` + "`" + `up_to_message_id` + "`" + ` to set read_at in conversation.",
+                "description": "Send ` + "`" + `{\"action\":\"mark_messages_read\",\"payload\":{...}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The sender receives ` + "`" + `mark_messages_read` + "`" + ` with ` + "`" + `responses.MarkMessagesReadResponse` + "`" + `. If at least one message changes, the other participant also receives the ` + "`" + `messages_read` + "`" + ` broadcast.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1552,7 +1607,7 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Mark messages as read over WebSocket",
+                "summary": "WebSocket event: mark_messages_read",
                 "parameters": [
                     {
                         "description": "Mark messages as read payload",
@@ -1568,10 +1623,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.MarkMessagesReadResponse"
                         }
                     }
                 }
@@ -1584,6 +1636,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Send ` + "`" + `{\"action\":\"reject_friend_request\",\"payload\":{\"friend_id\":\"...\"}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The authenticated user rejects a previously received pending invitation from ` + "`" + `friend_id` + "`" + `. The server replies with ` + "`" + `reject_friend_request` + "`" + ` and a confirmation message.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1609,10 +1662,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.StatusMessageResponse"
                         }
                     }
                 }
@@ -1625,6 +1675,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Send ` + "`" + `{\"action\":\"remove_friend\",\"payload\":{\"friend_id\":\"...\"}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The server removes the friendship in either direction and replies with ` + "`" + `remove_friend` + "`" + ` and a confirmation message.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1650,10 +1701,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.StatusMessageResponse"
                         }
                     }
                 }
@@ -1666,6 +1714,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Send ` + "`" + `{\"action\":\"send_friend_request\",\"payload\":{\"friend_id\":\"...\"}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The sender receives ` + "`" + `send_friend_request` + "`" + ` with a simple confirmation message when the pending invitation is created.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1675,7 +1724,7 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Send friend request over WebSocket",
+                "summary": "WebSocket event: send_friend_request",
                 "parameters": [
                     {
                         "description": "Friend request payload",
@@ -1691,10 +1740,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.StatusMessageResponse"
                         }
                     }
                 }
@@ -1707,7 +1753,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Connect to the WebSocket, send an event named ` + "`" + `send_message` + "`" + ` with this payload. Server will broadcast ` + "`" + `message_received` + "`" + ` to recipient.",
+                "description": "Send ` + "`" + `{\"action\":\"send_message\",\"payload\":{...}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The sender receives the ` + "`" + `message_sent` + "`" + ` event and the recipient receives the ` + "`" + `message_received` + "`" + ` event. Both events carry a ` + "`" + `responses.MessageResponse` + "`" + ` in ` + "`" + `data` + "`" + `.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1717,7 +1763,7 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Send a chat message over WebSocket",
+                "summary": "WebSocket event: send_message",
                 "parameters": [
                     {
                         "description": "Send message payload",
@@ -1733,10 +1779,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.MessageResponse"
                         }
                     }
                 }
@@ -1749,7 +1792,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Connect to the WebSocket, send an event named ` + "`" + `share_task` + "`" + ` with a task snapshot payload. Server will persist the shared task in chat history and broadcast it to the recipient.",
+                "description": "Send ` + "`" + `{\"action\":\"share_task\",\"payload\":{...}}` + "`" + ` after connecting to ` + "`" + `/api/ws` + "`" + `. The task must belong to the authenticated sender. The server persists a chat message with ` + "`" + `type = shared_task` + "`" + `, returns ` + "`" + `message_sent` + "`" + ` to the sender, and broadcasts ` + "`" + `message_received` + "`" + ` to the recipient. The payload in ` + "`" + `data` + "`" + ` is ` + "`" + `responses.MessageResponse` + "`" + ` with the ` + "`" + `shared_task` + "`" + ` snapshot filled.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1759,7 +1802,7 @@ const docTemplate = `{
                 "tags": [
                     "websocket"
                 ],
-                "summary": "Share a task over WebSocket",
+                "summary": "WebSocket event: share_task",
                 "parameters": [
                     {
                         "description": "Share task payload",
@@ -1775,10 +1818,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/responses.MessageResponse"
                         }
                     }
                 }
@@ -1976,6 +2016,20 @@ const docTemplate = `{
                 }
             }
         },
+        "responses.ChatResponse": {
+            "type": "object",
+            "properties": {
+                "friend": {
+                    "$ref": "#/definitions/responses.UserResponse"
+                },
+                "last_message": {
+                    "$ref": "#/definitions/responses.MessageResponse"
+                },
+                "unread_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "responses.GroupResponse": {
             "type": "object",
             "properties": {
@@ -1986,6 +2040,58 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.MarkMessagesReadResponse": {
+            "type": "object",
+            "properties": {
+                "read_at": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "with_user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "read_at": {
+                    "type": "string"
+                },
+                "received_at": {
+                    "type": "string"
+                },
+                "receiver": {
+                    "$ref": "#/definitions/responses.UserResponse"
+                },
+                "receiver_id": {
+                    "type": "string"
+                },
+                "sender": {
+                    "$ref": "#/definitions/responses.UserResponse"
+                },
+                "sender_id": {
+                    "type": "string"
+                },
+                "shared_task": {
+                    "$ref": "#/definitions/responses.SharedTaskSnapshotResponse"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -2056,6 +2162,45 @@ const docTemplate = `{
                 },
                 "total_pages": {
                     "type": "integer"
+                }
+            }
+        },
+        "responses.ReceivedFriendRequestResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "requester": {
+                    "$ref": "#/definitions/responses.UserResponse"
+                }
+            }
+        },
+        "responses.SharedTaskSnapshotResponse": {
+            "type": "object",
+            "properties": {
+                "group_color": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "source_task_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.StatusMessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },

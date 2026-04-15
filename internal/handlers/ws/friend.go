@@ -22,6 +22,7 @@ func (h *FriendHandlers) Register(r *ws.Router) {
 	r.On("reject_friend_request", h.RejectFriendRequest)
 	r.On("remove_friend", h.RemoveFriend)
 	r.On("get_friends", h.GetFriends)
+	r.On("get_pending_friend_requests", h.GetPendingFriendRequests)
 }
 
 func (h *FriendHandlers) SendFriendRequest(cl *ws.Client, payload json.RawMessage) {
@@ -96,4 +97,14 @@ func (h *FriendHandlers) GetFriends(cl *ws.Client, payload json.RawMessage) {
 	}
 
 	cl.Send("get_friends", friends)
+}
+
+func (h *FriendHandlers) GetPendingFriendRequests(cl *ws.Client, payload json.RawMessage) {
+	friendRequests, err := h.service.GetPendingFriendRequests(cl.UserID)
+	if err != nil {
+		cl.SendError("get_pending_friend_requests", err.Error())
+		return
+	}
+
+	cl.Send("get_pending_friend_requests", friendRequests)
 }

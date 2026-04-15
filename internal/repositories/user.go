@@ -115,3 +115,15 @@ func (r *UserRepository) GetFriends(userID uuid.UUID) ([]models.User, error) {
 		Find(&friends).Error
 	return friends, err
 }
+
+func (r *UserRepository) GetPendingFriendRequests(userID uuid.UUID) ([]models.UserFriend, error) {
+	var friendRequests []models.UserFriend
+
+	err := r.db.
+		Preload("User").
+		Where("friend_id = ? AND status = ?", userID, models.Pending).
+		Order("created_at desc").
+		Find(&friendRequests).Error
+
+	return friendRequests, err
+}

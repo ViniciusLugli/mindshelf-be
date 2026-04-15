@@ -128,3 +128,17 @@ func (s *UserService) GetFriends(userID uuid.UUID) ([]responses.UserResponse, er
 
 	return friendsDto, nil
 }
+
+func (s *UserService) GetPendingFriendRequests(userID uuid.UUID) ([]responses.ReceivedFriendRequestResponse, error) {
+	friendRequests, err := s.repo.GetPendingFriendRequests(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	friendRequestsDto := make([]responses.ReceivedFriendRequestResponse, len(friendRequests))
+	for i, friendship := range friendRequests {
+		friendRequestsDto[i] = responses.NewReceivedFriendRequestResponse(friendship)
+	}
+
+	return friendRequestsDto, nil
+}

@@ -124,6 +124,15 @@ definitions:
       user:
         $ref: '#/definitions/responses.UserResponse'
     type: object
+  responses.ChatResponse:
+    properties:
+      friend:
+        $ref: '#/definitions/responses.UserResponse'
+      last_message:
+        $ref: '#/definitions/responses.MessageResponse'
+      unread_count:
+        type: integer
+    type: object
   responses.GroupResponse:
     properties:
       color:
@@ -131,6 +140,40 @@ definitions:
       id:
         type: string
       name:
+        type: string
+    type: object
+  responses.MarkMessagesReadResponse:
+    properties:
+      read_at:
+        type: string
+      updated:
+        type: integer
+      with_user_id:
+        type: string
+    type: object
+  responses.MessageResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      read_at:
+        type: string
+      received_at:
+        type: string
+      receiver:
+        $ref: '#/definitions/responses.UserResponse'
+      receiver_id:
+        type: string
+      sender:
+        $ref: '#/definitions/responses.UserResponse'
+      sender_id:
+        type: string
+      shared_task:
+        $ref: '#/definitions/responses.SharedTaskSnapshotResponse'
+      type:
         type: string
     type: object
   responses.PaginatedGroupResponse:
@@ -177,6 +220,31 @@ definitions:
         type: integer
       total_pages:
         type: integer
+    type: object
+  responses.ReceivedFriendRequestResponse:
+    properties:
+      created_at:
+        type: string
+      requester:
+        $ref: '#/definitions/responses.UserResponse'
+    type: object
+  responses.SharedTaskSnapshotResponse:
+    properties:
+      group_color:
+        type: string
+      group_name:
+        type: string
+      notes:
+        type: string
+      source_task_id:
+        type: string
+      title:
+        type: string
+    type: object
+  responses.StatusMessageResponse:
+    properties:
+      message:
+        type: string
     type: object
   responses.TaskResponse:
     properties:
@@ -1012,6 +1080,24 @@ paths:
       summary: Update authenticated user
       tags:
       - user
+  /api/ws:
+    get:
+      description: Open a WebSocket connection on `/api/ws` using the same authentication
+        used by protected HTTP routes. After connecting, every client message must
+        use the envelope `{"action":"event_name","payload":{...}}`. Every server response
+        uses the envelope `{"action":"event_name","success":true|false,"data":...,"error":"..."}`.
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Connect to the authenticated WebSocket
+      tags:
+      - websocket
   /login:
     post:
       consumes:
@@ -1094,6 +1180,10 @@ paths:
     post:
       consumes:
       - application/json
+      description: Send `{"action":"accept_friend_request","payload":{"friend_id":"..."}}`
+        after connecting to `/api/ws`. The authenticated user accepts a previously
+        received pending invitation from `friend_id`. The server replies with `accept_friend_request`
+        and a confirmation message.
       parameters:
       - description: Friend request payload
         in: body
@@ -1107,9 +1197,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.StatusMessageResponse'
       security:
       - ApiKeyAuth: []
       summary: Accept friend request over WebSocket
@@ -1119,28 +1207,32 @@ paths:
     get:
       consumes:
       - application/json
-      description: Send event `get_chats` (no payload) to receive chats list (friend
-        + last message).
+      description: Send `{"action":"get_chats","payload":null}` after connecting to
+        `/api/ws`. The server responds to the same client with the `get_chats` event.
+        The event `data` contains `[]responses.ChatResponse` with friend info, last
+        message, and unread count.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            items:
+              $ref: '#/definitions/responses.ChatResponse'
+            type: array
       security:
       - ApiKeyAuth: []
-      summary: Get chats list over WebSocket
+      summary: 'WebSocket event: get_chats'
       tags:
       - websocket
   /ws/get_conversation:
     post:
       consumes:
       - application/json
-      description: Send event `get_conversation` with `with_user_id` to receive conversation
-        history.
+      description: Send `{"action":"get_conversation","payload":{"with_user_id":"..."}}`
+        after connecting to `/api/ws`. The server responds to the same client with
+        the `get_conversation` event. The event `data` contains the full ordered conversation
+        as `[]responses.MessageResponse`.
       parameters:
       - description: Get conversation payload
         in: body
@@ -1154,38 +1246,65 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            items:
+              $ref: '#/definitions/responses.MessageResponse'
+            type: array
       security:
       - ApiKeyAuth: []
-      summary: Get conversation messages over WebSocket
+      summary: 'WebSocket event: get_conversation'
       tags:
       - websocket
   /ws/get_friends:
     get:
       consumes:
       - application/json
+      description: Send `{"action":"get_friends","payload":null}` after connecting
+        to `/api/ws`. The server responds with `get_friends` and `[]responses.UserResponse`
+        in `data`.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            items:
+              $ref: '#/definitions/responses.UserResponse'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: Get friends list over WebSocket
+      tags:
+      - websocket
+  /ws/get_pending_friend_requests:
+    get:
+      consumes:
+      - application/json
+      description: Send `{"action":"get_pending_friend_requests","payload":null}`
+        after connecting to `/api/ws`. The server responds with `get_pending_friend_requests`
+        and `[]responses.ReceivedFriendRequestResponse` in `data`, listing only pending
+        invitations received by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.ReceivedFriendRequestResponse'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: 'WebSocket event: get_pending_friend_requests'
       tags:
       - websocket
   /ws/mark_messages_read:
     post:
       consumes:
       - application/json
-      description: Send event `mark_messages_read` with `with_user_id` and optional
-        `up_to_message_id` to set read_at in conversation.
+      description: Send `{"action":"mark_messages_read","payload":{...}}` after connecting
+        to `/api/ws`. The sender receives `mark_messages_read` with `responses.MarkMessagesReadResponse`.
+        If at least one message changes, the other participant also receives the `messages_read`
+        broadcast.
       parameters:
       - description: Mark messages as read payload
         in: body
@@ -1199,18 +1318,20 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.MarkMessagesReadResponse'
       security:
       - ApiKeyAuth: []
-      summary: Mark messages as read over WebSocket
+      summary: 'WebSocket event: mark_messages_read'
       tags:
       - websocket
   /ws/reject_friend_request:
     post:
       consumes:
       - application/json
+      description: Send `{"action":"reject_friend_request","payload":{"friend_id":"..."}}`
+        after connecting to `/api/ws`. The authenticated user rejects a previously
+        received pending invitation from `friend_id`. The server replies with `reject_friend_request`
+        and a confirmation message.
       parameters:
       - description: Friend request payload
         in: body
@@ -1224,9 +1345,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.StatusMessageResponse'
       security:
       - ApiKeyAuth: []
       summary: Reject friend request over WebSocket
@@ -1236,6 +1355,9 @@ paths:
     post:
       consumes:
       - application/json
+      description: Send `{"action":"remove_friend","payload":{"friend_id":"..."}}`
+        after connecting to `/api/ws`. The server removes the friendship in either
+        direction and replies with `remove_friend` and a confirmation message.
       parameters:
       - description: Remove friend payload
         in: body
@@ -1249,9 +1371,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.StatusMessageResponse'
       security:
       - ApiKeyAuth: []
       summary: Remove a friend over WebSocket
@@ -1261,6 +1381,9 @@ paths:
     post:
       consumes:
       - application/json
+      description: Send `{"action":"send_friend_request","payload":{"friend_id":"..."}}`
+        after connecting to `/api/ws`. The sender receives `send_friend_request` with
+        a simple confirmation message when the pending invitation is created.
       parameters:
       - description: Friend request payload
         in: body
@@ -1274,20 +1397,20 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.StatusMessageResponse'
       security:
       - ApiKeyAuth: []
-      summary: Send friend request over WebSocket
+      summary: 'WebSocket event: send_friend_request'
       tags:
       - websocket
   /ws/send_message:
     post:
       consumes:
       - application/json
-      description: Connect to the WebSocket, send an event named `send_message` with
-        this payload. Server will broadcast `message_received` to recipient.
+      description: Send `{"action":"send_message","payload":{...}}` after connecting
+        to `/api/ws`. The sender receives the `message_sent` event and the recipient
+        receives the `message_received` event. Both events carry a `responses.MessageResponse`
+        in `data`.
       parameters:
       - description: Send message payload
         in: body
@@ -1301,21 +1424,21 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.MessageResponse'
       security:
       - ApiKeyAuth: []
-      summary: Send a chat message over WebSocket
+      summary: 'WebSocket event: send_message'
       tags:
       - websocket
   /ws/share_task:
     post:
       consumes:
       - application/json
-      description: Connect to the WebSocket, send an event named `share_task` with
-        a task snapshot payload. Server will persist the shared task in chat history
-        and broadcast it to the recipient.
+      description: Send `{"action":"share_task","payload":{...}}` after connecting
+        to `/api/ws`. The task must belong to the authenticated sender. The server
+        persists a chat message with `type = shared_task`, returns `message_sent`
+        to the sender, and broadcasts `message_received` to the recipient. The payload
+        in `data` is `responses.MessageResponse` with the `shared_task` snapshot filled.
       parameters:
       - description: Share task payload
         in: body
@@ -1329,12 +1452,10 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/responses.MessageResponse'
       security:
       - ApiKeyAuth: []
-      summary: Share a task over WebSocket
+      summary: 'WebSocket event: share_task'
       tags:
       - websocket
 schemes:

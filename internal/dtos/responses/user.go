@@ -1,6 +1,8 @@
 package responses
 
 import (
+	"time"
+
 	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/google/uuid"
 )
@@ -15,6 +17,15 @@ type UserResponse struct {
 type AuthResponse struct {
 	Token string       `json:"token"`
 	User  UserResponse `json:"user"`
+}
+
+type ReceivedFriendRequestResponse struct {
+	Requester UserResponse `json:"requester"`
+	CreatedAt time.Time    `json:"created_at"`
+}
+
+type StatusMessageResponse struct {
+	Message string `json:"message"`
 }
 
 func NewUserResponse(user models.User) UserResponse {
@@ -35,5 +46,12 @@ func NewAuthResponse(token string, user models.User) AuthResponse {
 			Email:     user.Email,
 			AvatarURL: user.AvatarURL,
 		},
+	}
+}
+
+func NewReceivedFriendRequestResponse(friendship models.UserFriend) ReceivedFriendRequestResponse {
+	return ReceivedFriendRequestResponse{
+		Requester: NewUserResponse(friendship.User),
+		CreatedAt: friendship.CreatedAt,
 	}
 }
