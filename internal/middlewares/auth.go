@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -11,18 +12,24 @@ import (
 	"github.com/google/uuid"
 )
 
-var authCookieNames = []string{"token", "auth_token", "access_token", "jwt"}
+const authHeaderName = "Authorization"
+const authCookieName = "mindshelf_token"
 
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr, err := extractToken(c)
 		if err != nil {
+			hasCookieHeader := strings.TrimSpace(c.GetHeader("Cookie")) != ""
+			hasAuthorizationHeader := strings.TrimSpace(c.GetHeader(authHeaderName)) != ""
+
 			slog.Warn(
 				"unauthorized request",
 				"request_id", GetRequestID(c),
 				"reason", err.Error(),
 				"method", c.Request.Method,
 				"path", c.Request.URL.Path,
+				"has_cookie_header", hasCookieHeader,
+				"has_authorization_header", hasAuthorizationHeader,
 			)
 
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -53,19 +60,21 @@ func Auth() gin.HandlerFunc {
 }
 
 func extractToken(c *gin.Context) (string, error) {
-	if token := normalizeToken(c.GetHeader("Authorization")); token != "" {
+	if token := normalizeToken(c.GetHeader(authHeaderName)); token != "" {
 		return token, nil
 	}
 
-	for _, cookieName := range authCookieNames {
-		cookieValue, err := c.Cookie(cookieName)
-		if err != nil {
-			continue
-		}
-
+	cookieValue, err := c.Cookie(authCookieName)
+	if err == nil {
 		if token := normalizeToken(cookieValue); token != "" {
+			fmt.Println("token extracted: ", token)
 			return token, nil
 		}
+	}
+
+	if token := tokenFromRawCookieHeader(c.GetHeader("Cookie"), authCookieName); token != "" {
+		fmt.Println("token extracted: ", token)
+		return token, nil
 	}
 
 	return "", errors.New("missing authorization token")
@@ -82,6 +91,28 @@ func normalizeToken(raw string) string {
 	}
 
 	return raw
+}
+
+func tokenFromRawCookieHeader(rawHeader, cookieName string) string {
+	if strings.TrimSpace(rawHeader) == "" {
+		return ""
+	}
+
+	cookies := strings.Split(rawHeader, ";")
+	for _, cookie := range cookies {
+		parts := strings.SplitN(strings.TrimSpace(cookie), "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		if strings.TrimSpace(parts[0]) != cookieName {
+			continue
+		}
+
+		return normalizeToken(parts[1])
+	}
+
+	return ""
 }
 
 func GetAuthenticatedUserID(c *gin.Context) (uuid.UUID, error) {

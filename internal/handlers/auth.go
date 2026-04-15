@@ -2,12 +2,16 @@ package handlers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
 	"github.com/gin-gonic/gin"
 )
+
+const authCookieName = "mindshelf_token"
+const authCookieMaxAgeSeconds = 30 * 24 * 60 * 60
 
 type AuthHandler struct {
 	service *services.AuthService
@@ -46,6 +50,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	setAuthCookie(c, user.Token)
+
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -76,5 +82,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	setAuthCookie(c, user.Token)
+
 	c.JSON(http.StatusOK, user)
+}
+
+func setAuthCookie(c *gin.Context, token string) {
+	isSecure := c.Request.TLS != nil || os.Getenv("COOKIE_SECURE") == "true"
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie(authCookieName, token, authCookieMaxAgeSeconds, "/", "", isSecure, true)
 }
