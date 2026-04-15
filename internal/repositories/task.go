@@ -26,11 +26,15 @@ func (r *TaskRepository) Delete(task *models.Task) error {
 	return r.db.Delete(task).Error
 }
 
+func (r *TaskRepository) userGroupsSubquery(userID uuid.UUID) *gorm.DB {
+	return r.db.Model(&models.Group{}).Select("id").Where("user_id = ?", userID)
+}
+
 func (r *TaskRepository) GetByID(id uuid.UUID, userID uuid.UUID) (models.Task, error) {
 	var task models.Task
 	err := r.db.
-		Joins("Group").
-		Where(`tasks.id = ? AND "Group"."user_id" = ?`, id, userID).
+		Preload("Group").
+		Where("tasks.id = ? AND tasks.group_id IN (?)", id, r.userGroupsSubquery(userID)).
 		First(&task).Error
 	return task, err
 }
@@ -38,8 +42,8 @@ func (r *TaskRepository) GetByID(id uuid.UUID, userID uuid.UUID) (models.Task, e
 func (r *TaskRepository) GetByTitle(title string, userID uuid.UUID) (models.Task, error) {
 	var task models.Task
 	err := r.db.
-		Joins("Group").
-		Where(`tasks.title = ? AND "Group"."user_id" = ?`, title, userID).
+		Preload("Group").
+		Where("tasks.title = ? AND tasks.group_id IN (?)", title, r.userGroupsSubquery(userID)).
 		First(&task).Error
 
 	return task, err
@@ -50,14 +54,13 @@ func (r *TaskRepository) GetAllByTitle(title string, limit, offset int, userID u
 	var count int64
 
 	base := r.db.Model(&models.Task{}).
-		Joins("Group").
-		Where(`tasks.title LIKE ? AND "Group"."user_id" = ?`, "%"+title+"%", userID)
+		Where("tasks.title LIKE ? AND tasks.group_id IN (?)", "%"+title+"%", r.userGroupsSubquery(userID))
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := base.Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
+	if err := base.Preload("Group").Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -68,13 +71,13 @@ func (r *TaskRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.T
 	var tasks []models.Task
 	var count int64
 
-	base := r.db.Model(&models.Task{}).Joins("Group").Where(`"Group"."user_id" = ?`, userID)
+	base := r.db.Model(&models.Task{}).Where("tasks.group_id IN (?)", r.userGroupsSubquery(userID))
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := base.Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
+	if err := base.Preload("Group").Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -86,14 +89,13 @@ func (r *TaskRepository) GetAllByGroupID(groupID uuid.UUID, limit, offset int, u
 	var count int64
 
 	base := r.db.Model(&models.Task{}).
-		Joins("Group").
-		Where(`tasks.group_id = ? AND "Group"."user_id" = ?`, groupID, userID)
+		Where("tasks.group_id = ? AND tasks.group_id IN (?)", groupID, r.userGroupsSubquery(userID))
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := base.Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
+	if err := base.Preload("Group").Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
 		return nil, 0, err
 	}
 
