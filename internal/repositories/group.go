@@ -36,7 +36,7 @@ func (r *GroupRepository) GetAllByName(name string, limit, offset int, userID uu
 	var groups []models.Group
 	var count int64
 
-	base := r.db.Where("name LIKE ? and user_id = ?", "%"+name+"%", userID)
+	base := r.db.Model(&models.Group{}).Where("name LIKE ? and user_id = ?", "%"+name+"%", userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
@@ -53,7 +53,7 @@ func (r *GroupRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.
 	var groups []models.Group
 	var count int64
 
-	base := r.db.Model(groups).Where("user_id = ?", userID)
+	base := r.db.Model(&models.Group{}).Where("user_id = ?", userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return groups, count, err
@@ -64,4 +64,14 @@ func (r *GroupRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.
 	}
 
 	return groups, count, nil
+}
+
+func (r *GroupRepository) ExistsByIDAndUserID(id, userID uuid.UUID) (bool, error) {
+	var count int64
+
+	err := r.db.Model(&models.Group{}).
+		Where("id = ? AND user_id = ?", id, userID).
+		Count(&count).Error
+
+	return count > 0, err
 }

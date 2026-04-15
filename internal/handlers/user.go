@@ -40,10 +40,11 @@ func (h *UserHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	var dto requests.UpdateUserRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -51,6 +52,13 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.service.Update(dto, userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "user not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -58,7 +66,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "user updated succesfully",
+		"message": "user updated successfully",
 	})
 }
 
@@ -77,9 +85,17 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	if err := h.service.Delete(userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "user not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -105,7 +121,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Router /api/user/ [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	var dto requests.GetUser
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -147,7 +163,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	var dto requests.GetAllUsers
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

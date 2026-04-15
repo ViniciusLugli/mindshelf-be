@@ -62,7 +62,7 @@ func ValidateToken(tokenStr string) (*Claims, error) {
 	})
 
 	if err != nil || !token.Valid {
-		return nil, errors.New("expire ou invalid token")
+		return nil, errors.New("expired or invalid token")
 	}
 
 	claims, ok := token.Claims.(*Claims)

@@ -24,9 +24,22 @@ func (s *UserService) Update(dto requests.UpdateUserRequest, id uuid.UUID) error
 		return err
 	}
 
-	user.Name = dto.Name
-	user.Email = dto.Email
-	user.Password = dto.Password
+	if dto.Name != "" {
+		user.Name = dto.Name
+	}
+
+	if dto.Email != "" {
+		user.Email = dto.Email
+	}
+
+	if dto.Password != "" {
+		hashedPassword, err := HashPassword(dto.Password)
+		if err != nil {
+			return err
+		}
+
+		user.Password = hashedPassword
+	}
 
 	return s.repo.Update(&user)
 }

@@ -45,7 +45,7 @@ func (h *GroupHandler) Create(c *gin.Context) {
 
 	var dto requests.CreateGroupRequest
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -87,7 +87,7 @@ func (h *GroupHandler) Update(c *gin.Context) {
 
 	var dto requests.UpdateGroupRequest
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -95,6 +95,13 @@ func (h *GroupHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.service.Update(dto, userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "group not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -128,7 +135,7 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 
 	var dto requests.DeleteGroupRequest
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -136,6 +143,13 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.service.Delete(dto, userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "group not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -267,10 +281,11 @@ func (h *GroupHandler) GetAllGroups(c *gin.Context) {
 
 	var dto requests.GetAllGroups
 
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	groups, err := h.service.GetAll(dto, userID)
@@ -278,6 +293,7 @@ func (h *GroupHandler) GetAllGroups(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, groups)

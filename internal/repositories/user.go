@@ -109,7 +109,7 @@ func (r *UserRepository) RemoveFriend(userID, friendID uuid.UUID) error {
 func (r *UserRepository) GetFriends(userID uuid.UUID) ([]models.User, error) {
 	var friends []models.User
 	err := r.db.
-		Joins("JOIN user_friends ON user_friends.friends_id = users.id OR user_friends.user_id = users.id").
+		Joins("JOIN user_friends ON user_friends.friend_id = users.id OR user_friends.user_id = users.id").
 		Where("(user_friends.user_id = ? OR user_friends.friend_id = ?) AND user_friends.status = 'accepted' AND users.id != ?",
 			userID, userID, userID).
 		Find(&friends).Error

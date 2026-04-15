@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -67,13 +66,11 @@ func extractToken(c *gin.Context) (string, error) {
 	cookieValue, err := c.Cookie(authCookieName)
 	if err == nil {
 		if token := normalizeToken(cookieValue); token != "" {
-			fmt.Println("token extracted: ", token)
 			return token, nil
 		}
 	}
 
 	if token := tokenFromRawCookieHeader(c.GetHeader("Cookie"), authCookieName); token != "" {
-		fmt.Println("token extracted: ", token)
 		return token, nil
 	}
 

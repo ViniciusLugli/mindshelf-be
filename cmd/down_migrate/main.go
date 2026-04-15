@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -20,10 +21,13 @@ func main() {
 	}
 
 	if len(os.Args) < 2 {
-		log.Fatal("use: go run ./cmd/down_migrate <number | all> <nil | force>")
+		log.Fatal("use: go run ./cmd/down_migrate <number | all | wipe | force> [args]")
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = os.Getenv("DSN")
+	}
 
 	arg := os.Args[1]
 
@@ -52,23 +56,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	quantity := os.Args[1]
-
-	var force string
-	if len(os.Args) < 3 {
-		force = ""
-	} else {
-		force = os.Args[2]
-	}
-
-	if force != "" {
-		if quantity != "all" {
-			force_steps_down(quantity, m)
-			return
+	if arg == "force" {
+		if len(os.Args) < 3 {
+			log.Fatal("use: go run ./cmd/down_migrate force <version>")
 		}
 
-		log.Fatal("use: go run ./cmd/down_migrate <number> force")
+		forceVersion(os.Args[2], m)
+		return
 	}
+
+	quantity := os.Args[1]
 
 	if quantity == "all" {
 		all_down(m)
@@ -78,33 +75,33 @@ func main() {
 	steps_down(quantity, m)
 }
 
-func all_down(migrate *migrate.Migrate) {
-	if err := migrate.Down(); err != nil {
+func all_down(m *migrate.Migrate) {
+	if err := m.Down(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatal(err)
 	}
 	log.Println("All migrations rolled back successfully")
 }
 
-func steps_down(quantity string, migrate *migrate.Migrate) {
+func steps_down(quantity string, m *migrate.Migrate) {
 	steps, err := strconv.Atoi(quantity)
-	if err != nil {
+	if err != nil || steps <= 0 {
 		log.Fatal("invalid number of steps")
 	}
 
-	if err := migrate.Down(); err != nil {
+	if err := m.Steps(-steps); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatal(err)
 	}
 	log.Printf("Rolled back %d migrations successfully", steps)
 }
 
-func force_steps_down(quantity string, migrate *migrate.Migrate) {
-	steps, err := strconv.Atoi(quantity)
-	if err != nil {
-		log.Fatal("invalid number of steps")
+func forceVersion(version string, m *migrate.Migrate) {
+	forceToVersion, err := strconv.Atoi(version)
+	if err != nil || forceToVersion < 0 {
+		log.Fatal("invalid migration version")
 	}
 
-	if err := migrate.Force(steps); err != nil {
+	if err := m.Force(forceToVersion); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Forced rolled back %d migrations successfully", steps)
+	log.Printf("Forced migration state to version %d successfully", forceToVersion)
 }

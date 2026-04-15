@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
 
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
@@ -10,7 +13,30 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	CheckOrigin: func(r *http.Request) bool {
+		origin := strings.TrimSpace(r.Header.Get("Origin"))
+		if origin == "" {
+			return true
+		}
+
+		originURL, err := url.Parse(origin)
+		if err != nil {
+			return false
+		}
+
+		if strings.EqualFold(originURL.Host, r.Host) {
+			return true
+		}
+
+		allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
+		for _, allowedOrigin := range allowedOrigins {
+			if strings.EqualFold(strings.TrimSpace(allowedOrigin), origin) {
+				return true
+			}
+		}
+
+		return false
+	},
 }
 
 type WSHandler struct {

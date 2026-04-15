@@ -52,7 +52,7 @@ func main() {
 	groupHandler := handlers.NewGroupHandler(groupService)
 
 	taskRepository := repositories.NewTaskRepository(db)
-	taskService := services.NewTaskService(taskRepository)
+	taskService := services.NewTaskService(taskRepository, groupRepository)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
 	router := gin.New()
@@ -86,6 +86,7 @@ func main() {
 		groupRoute.POST("/create", groupHandler.Create)
 		groupRoute.PATCH("/update", groupHandler.Update)
 		groupRoute.POST("/delete", groupHandler.Delete)
+		groupRoute.DELETE("/delete", groupHandler.Delete)
 	}
 
 	{

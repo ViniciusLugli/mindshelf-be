@@ -35,15 +35,30 @@ func NewTaskHandler(service *services.TaskService) *TaskHandler {
 // @Failure 500 {object} map[string]string
 // @Router /api/task/create [post]
 func (h *TaskHandler) Create(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	var dto requests.CreateTaskRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	if err := h.service.Create(dto); err != nil {
+	if err := h.service.Create(dto, userID); err != nil {
+		if errors.Is(err, services.ErrTaskGroupNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -77,7 +92,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	}
 
 	var dto requests.UpdateTaskRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -85,6 +100,13 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.service.Update(dto, userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "task not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -92,7 +114,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "task updated succesfully",
+		"message": "task updated successfully",
 	})
 }
 
@@ -118,7 +140,7 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 	}
 
 	var dto requests.DeleteTaskRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -126,6 +148,13 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.service.Delete(dto, userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "task not found",
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -158,7 +187,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 	}
 
 	var dto requests.GetTask
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -208,7 +237,7 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 	}
 
 	var dto requests.GetAllTasks
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

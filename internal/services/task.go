@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"math"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
@@ -9,15 +10,27 @@ import (
 	"github.com/google/uuid"
 )
 
+var ErrTaskGroupNotFound = errors.New("group not found")
+
 type TaskService struct {
-	repo *repositories.TaskRepository
+	repo      *repositories.TaskRepository
+	groupRepo *repositories.GroupRepository
 }
 
-func NewTaskService(repo *repositories.TaskRepository) *TaskService {
-	return &TaskService{repo: repo}
+func NewTaskService(repo *repositories.TaskRepository, groupRepo *repositories.GroupRepository) *TaskService {
+	return &TaskService{repo: repo, groupRepo: groupRepo}
 }
 
-func (s *TaskService) Create(dto requests.CreateTaskRequest) error {
+func (s *TaskService) Create(dto requests.CreateTaskRequest, userID uuid.UUID) error {
+	exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return ErrTaskGroupNotFound
+	}
+
 	task := dto.ToModel()
 	return s.repo.Create(&task)
 }
@@ -28,8 +41,13 @@ func (s *TaskService) Update(dto requests.UpdateTaskRequest, userID uuid.UUID) e
 		return err
 	}
 
-	task.Title = dto.Title
-	task.Notes = dto.Notes
+	if dto.Title != "" {
+		task.Title = dto.Title
+	}
+
+	if dto.Notes != "" {
+		task.Notes = dto.Notes
+	}
 
 	return s.repo.Update(&task)
 }

@@ -23,7 +23,7 @@ func (r *Router) On(action string, fn HandlerFunc) {
 func (r *Router) Dispatch(cl *Client, msg requests.RequestMessage) {
 	fn, ok := r.handlers[msg.Action]
 	if !ok {
-		cl.SendError(msg.Action, "unknow action")
+		cl.SendError(msg.Action, "unknown action")
 		return
 	}
 

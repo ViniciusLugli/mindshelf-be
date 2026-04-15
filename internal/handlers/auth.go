@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"os"
 
@@ -35,7 +36,7 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var dto requests.CreateUserRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -44,6 +45,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	user, err := h.service.Register(dto)
 	if err != nil {
+		if errors.Is(err, services.ErrEmailAlreadyInUse) {
+			c.JSON(http.StatusConflict, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -67,7 +75,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var dto requests.LoginRequest
-	if err := c.ShouldBind(&dto); err != nil {
+	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -76,6 +84,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	user, err := h.service.Login(dto)
 	if err != nil {
+		if errors.Is(err, services.ErrInvalidCredentials) {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest:
+  requests.CreateGroupRequest:
     properties:
       color:
         type: string
@@ -10,7 +10,7 @@ definitions:
     - color
     - name
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest:
+  requests.CreateTaskRequest:
     properties:
       group_id:
         type: string
@@ -22,7 +22,7 @@ definitions:
     - group_id
     - title
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest:
+  requests.CreateUserRequest:
     properties:
       email:
         type: string
@@ -35,26 +35,26 @@ definitions:
     - name
     - password
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest:
+  requests.DeleteTaskRequest:
     properties:
       id:
         type: string
     required:
     - id
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest:
+  requests.FriendRequest:
     properties:
       friend_id:
         type: string
     required:
     - friend_id
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest:
+  requests.GetChatRequest:
     properties:
       with_user_id:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest:
+  requests.LoginRequest:
     properties:
       email:
         type: string
@@ -64,21 +64,21 @@ definitions:
     - email
     - password
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.MarkMessagesReadRequest:
+  requests.MarkMessagesReadRequest:
     properties:
       up_to_message_id:
         type: string
       with_user_id:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest:
+  requests.SendChatRequest:
     properties:
       content:
         type: string
       to_user_id:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest:
+  requests.UpdateGroupRequest:
     properties:
       id:
         type: string
@@ -88,7 +88,7 @@ definitions:
     - id
     - name
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest:
+  requests.UpdateTaskRequest:
     properties:
       id:
         type: string
@@ -99,7 +99,7 @@ definitions:
     required:
     - id
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest:
+  requests.UpdateUserRequest:
     properties:
       email:
         type: string
@@ -108,14 +108,14 @@ definitions:
       password:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse:
+  responses.AuthResponse:
     properties:
       token:
         type: string
       user:
-        $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
+        $ref: '#/definitions/responses.UserResponse'
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse:
+  responses.GroupResponse:
     properties:
       color:
         type: string
@@ -124,11 +124,11 @@ definitions:
       name:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse:
+  responses.PaginatedGroupResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse'
+          $ref: '#/definitions/responses.GroupResponse'
         type: array
       limit:
         type: integer
@@ -139,11 +139,11 @@ definitions:
       total_pages:
         type: integer
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse:
+  responses.PaginatedTaskResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse'
+          $ref: '#/definitions/responses.TaskResponse'
         type: array
       limit:
         type: integer
@@ -154,11 +154,11 @@ definitions:
       total_pages:
         type: integer
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse:
+  responses.PaginatedUserResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
+          $ref: '#/definitions/responses.UserResponse'
         type: array
       limit:
         type: integer
@@ -169,7 +169,7 @@ definitions:
       total_pages:
         type: integer
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse:
+  responses.TaskResponse:
     properties:
       group_color:
         type: string
@@ -182,7 +182,7 @@ definitions:
       title:
         type: string
     type: object
-  github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse:
+  responses.UserResponse:
     properties:
       avatar_url:
         type: string
@@ -221,7 +221,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse'
+            $ref: '#/definitions/responses.PaginatedGroupResponse'
         "400":
           description: Bad Request
           schema:
@@ -255,7 +255,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateGroupRequest'
+          $ref: '#/definitions/requests.CreateGroupRequest'
       produces:
       - application/json
       responses:
@@ -342,7 +342,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.GroupResponse'
+            $ref: '#/definitions/responses.GroupResponse'
         "400":
           description: Bad Request
           schema:
@@ -398,7 +398,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedGroupResponse'
+            $ref: '#/definitions/responses.PaginatedGroupResponse'
         "400":
           description: Bad Request
           schema:
@@ -432,7 +432,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateGroupRequest'
+          $ref: '#/definitions/requests.UpdateGroupRequest'
       produces:
       - application/json
       responses:
@@ -481,7 +481,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.TaskResponse'
+            $ref: '#/definitions/responses.TaskResponse'
         "400":
           description: Bad Request
           schema:
@@ -537,7 +537,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse'
+            $ref: '#/definitions/responses.PaginatedTaskResponse'
         "400":
           description: Bad Request
           schema:
@@ -580,7 +580,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedTaskResponse'
+            $ref: '#/definitions/responses.PaginatedTaskResponse'
         "400":
           description: Bad Request
           schema:
@@ -614,7 +614,7 @@ paths:
         name: task
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateTaskRequest'
+          $ref: '#/definitions/requests.CreateTaskRequest'
       produces:
       - application/json
       responses:
@@ -657,7 +657,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.DeleteTaskRequest'
+          $ref: '#/definitions/requests.DeleteTaskRequest'
       produces:
       - application/json
       responses:
@@ -698,7 +698,7 @@ paths:
         name: task
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateTaskRequest'
+          $ref: '#/definitions/requests.UpdateTaskRequest'
       produces:
       - application/json
       responses:
@@ -750,7 +750,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.UserResponse'
+            $ref: '#/definitions/responses.UserResponse'
         "400":
           description: Bad Request
           schema:
@@ -806,7 +806,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.PaginatedUserResponse'
+            $ref: '#/definitions/responses.PaginatedUserResponse'
         "400":
           description: Bad Request
           schema:
@@ -866,7 +866,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.UpdateUserRequest'
+          $ref: '#/definitions/requests.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -909,14 +909,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.LoginRequest'
+          $ref: '#/definitions/requests.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse'
+            $ref: '#/definitions/responses.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -942,14 +942,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.CreateUserRequest'
+          $ref: '#/definitions/requests.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_responses.AuthResponse'
+            $ref: '#/definitions/responses.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -975,7 +975,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
+          $ref: '#/definitions/requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -1018,7 +1018,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.GetChatRequest'
+          $ref: '#/definitions/requests.GetChatRequest'
       produces:
       - application/json
       responses:
@@ -1059,7 +1059,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.MarkMessagesReadRequest'
+          $ref: '#/definitions/requests.MarkMessagesReadRequest'
       produces:
       - application/json
       responses:
@@ -1082,7 +1082,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
+          $ref: '#/definitions/requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -1105,7 +1105,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.FriendRequest'
+          $ref: '#/definitions/requests.FriendRequest'
       produces:
       - application/json
       responses:
@@ -1130,7 +1130,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_ViniciusLugli_mindshelf_internal_dtos_requests.SendChatRequest'
+          $ref: '#/definitions/requests.SendChatRequest'
       produces:
       - application/json
       responses:

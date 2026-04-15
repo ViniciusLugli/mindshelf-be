@@ -10,7 +10,11 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/utils"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
+
+var ErrInvalidCredentials = errors.New("invalid email or password")
+var ErrEmailAlreadyInUse = errors.New("email already in use")
 
 type AuthService struct {
 	repo *repositories.UserRepository
@@ -32,6 +36,12 @@ func CheckPassword(password string, hash string) bool {
 
 func (s *AuthService) Register(dto requests.CreateUserRequest) (responses.AuthResponse, error) {
 	if err := utils.ValidateJWTConfig(); err != nil {
+		return responses.AuthResponse{}, err
+	}
+
+	if _, err := s.repo.GetByEmail(dto.Email); err == nil {
+		return responses.AuthResponse{}, ErrEmailAlreadyInUse
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return responses.AuthResponse{}, err
 	}
 
@@ -62,11 +72,15 @@ func (s *AuthService) Register(dto requests.CreateUserRequest) (responses.AuthRe
 func (s *AuthService) Login(dto requests.LoginRequest) (responses.AuthResponse, error) {
 	user, err := s.repo.GetByEmail(dto.Email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return responses.AuthResponse{}, ErrInvalidCredentials
+		}
+
 		return responses.AuthResponse{}, err
 	}
 
 	if !CheckPassword(dto.Password, user.Password) {
-		return responses.AuthResponse{}, errors.New("Invalid Email or Password")
+		return responses.AuthResponse{}, ErrInvalidCredentials
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Email)

@@ -39,7 +39,7 @@ func (r *TaskRepository) GetByTitle(title string, userID uuid.UUID) (models.Task
 	var task models.Task
 	err := r.db.
 		Joins("Group").
-		Where("task.title = ? AND groups.user_id = ?", title, userID).
+		Where("tasks.title = ? AND groups.user_id = ?", title, userID).
 		First(&task).Error
 
 	return task, err
@@ -51,7 +51,7 @@ func (r *TaskRepository) GetAllByTitle(title string, limit, offset int, userID u
 
 	base := r.db.Model(&models.Task{}).
 		Joins("Group").
-		Where("task.title LIKE ? AND groups.user_id = ?", "%"+title+"%", userID)
+		Where("tasks.title LIKE ? AND groups.user_id = ?", "%"+title+"%", userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err

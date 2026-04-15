@@ -23,11 +23,11 @@ type GetAllTasksByTitle struct {
 type CreateTaskRequest struct {
 	Title   string    `json:"title" binding:"required"`
 	Notes   string    `json:"notes"`
-	GroupID uuid.UUID `json:"group_id" binding:"required"`
+	GroupID uuid.UUID `json:"group_id" binding:"required,uuid"`
 }
 
 type UpdateTaskRequest struct {
-	ID    uuid.UUID `json:"id" binding:"required"`
+	ID    uuid.UUID `json:"id" binding:"required,uuid"`
 	Title string    `json:"title"`
 	Notes string    `json:"notes"`
 }
