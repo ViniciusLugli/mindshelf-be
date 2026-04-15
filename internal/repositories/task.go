@@ -80,3 +80,22 @@ func (r *TaskRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.T
 
 	return tasks, count, nil
 }
+
+func (r *TaskRepository) GetAllByGroupID(groupID uuid.UUID, limit, offset int, userID uuid.UUID) ([]models.Task, int64, error) {
+	var tasks []models.Task
+	var count int64
+
+	base := r.db.Model(&models.Task{}).
+		Joins("Group").
+		Where("tasks.group_id = ? AND groups.user_id = ?", groupID, userID)
+
+	if err := base.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := base.Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return tasks, count, nil
+}

@@ -93,3 +93,24 @@ func (s *TaskService) GetAllTasksByTitle(dto requests.GetAllTasksByTitle, userID
 	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
 	return responses.NewPaginatedResponse(tasks, responses.NewTaskResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
 }
+
+func (s *TaskService) GetAllTasksByGroup(dto requests.GetAllTasksByGroup, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
+	exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
+	if err != nil {
+		return responses.PaginatedResponse[responses.TaskResponse]{}, err
+	}
+
+	if !exists {
+		return responses.PaginatedResponse[responses.TaskResponse]{}, ErrTaskGroupNotFound
+	}
+
+	offset := (dto.Page - 1) * dto.Limit
+
+	tasks, count, err := s.repo.GetAllByGroupID(dto.GroupID, dto.Limit, offset, userID)
+	if err != nil {
+		return responses.PaginatedResponse[responses.TaskResponse]{}, err
+	}
+
+	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
+	return responses.NewPaginatedResponse(tasks, responses.NewTaskResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
+}

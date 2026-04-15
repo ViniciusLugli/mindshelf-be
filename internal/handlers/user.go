@@ -32,6 +32,7 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/user/update [patch]
 func (h *UserHandler) Update(c *gin.Context) {
@@ -77,6 +78,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Produce json
 // @Success 204 {string} string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/user/delete [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
@@ -158,6 +160,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Param limit query int false "limit"
 // @Success 200 {object} responses.PaginatedUserResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/user/all [get]
 

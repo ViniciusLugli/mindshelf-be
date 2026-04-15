@@ -78,6 +78,15 @@ definitions:
       to_user_id:
         type: string
     type: object
+  requests.ShareTaskRequest:
+    properties:
+      content:
+        type: string
+      task_id:
+        type: string
+      to_user_id:
+        type: string
+    type: object
   requests.UpdateGroupRequest:
     properties:
       id:
@@ -289,7 +298,7 @@ paths:
       tags:
       - group
   /api/group/delete:
-    post:
+    delete:
       parameters:
       - description: Group ID
         in: query
@@ -311,6 +320,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -454,6 +469,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -550,6 +571,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -636,6 +663,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -677,6 +710,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -686,6 +725,62 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete a task
+      tags:
+      - task
+  /api/task/group/{groupID}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Group ID
+        in: path
+        name: groupID
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get paginated tasks by group
       tags:
       - task
   /api/task/update:
@@ -716,6 +811,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -845,6 +946,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -888,6 +995,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -919,6 +1032,12 @@ paths:
             $ref: '#/definitions/responses.AuthResponse'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
@@ -956,6 +1075,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -985,6 +1110,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Accept friend request over WebSocket
       tags:
       - websocket
@@ -1003,6 +1130,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get chats list over WebSocket
       tags:
       - websocket
@@ -1028,6 +1157,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get conversation messages over WebSocket
       tags:
       - websocket
@@ -1044,6 +1175,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get friends list over WebSocket
       tags:
       - websocket
@@ -1069,6 +1202,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Mark messages as read over WebSocket
       tags:
       - websocket
@@ -1092,7 +1227,34 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Reject friend request over WebSocket
+      tags:
+      - websocket
+  /ws/remove_friend:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Remove friend payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.FriendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove a friend over WebSocket
       tags:
       - websocket
   /ws/send_friend_request:
@@ -1115,6 +1277,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Send friend request over WebSocket
       tags:
       - websocket
@@ -1140,7 +1304,37 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Send a chat message over WebSocket
+      tags:
+      - websocket
+  /ws/share_task:
+    post:
+      consumes:
+      - application/json
+      description: Connect to the WebSocket, send an event named `share_task` with
+        a task snapshot payload. Server will persist the shared task in chat history
+        and broadcast it to the recipient.
+      parameters:
+      - description: Share task payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.ShareTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Share a task over WebSocket
       tags:
       - websocket
 schemes:

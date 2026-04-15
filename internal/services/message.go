@@ -1,19 +1,26 @@
 package services
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
 	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
+var ErrSharedTaskNotFound = errors.New("task not found")
+
 type MessageService struct {
-	repo *repositories.MessageRepository
+	repo     *repositories.MessageRepository
+	taskRepo *repositories.TaskRepository
 }
 
-func NewMessageService(repo *repositories.MessageRepository) *MessageService {
-	return &MessageService{repo: repo}
+func NewMessageService(repo *repositories.MessageRepository, taskRepo *repositories.TaskRepository) *MessageService {
+	return &MessageService{repo: repo, taskRepo: taskRepo}
 }
 
 func (s *MessageService) GetMessages(userID, correspondentID uuid.UUID, page, limit int) (responses.PaginatedResponse[responses.MessageResponse], error) {
@@ -37,19 +44,54 @@ func (s *MessageService) GetMessages(userID, correspondentID uuid.UUID, page, li
 
 func (s *MessageService) SendMessage(senderID uuid.UUID, dto requests.SendChatRequest) (responses.MessageResponse, error) {
 	msg := models.Message{
+		Type:       models.MessageTypeText,
 		SenderID:   senderID,
 		ReceiverID: dto.ToUserID,
 		Content:    dto.Content,
 	}
 
-	created, err := s.repo.Create(&msg)
+	return s.createAndLoadMessage(&msg)
+}
+
+func (s *MessageService) ShareTask(senderID uuid.UUID, dto requests.ShareTaskRequest) (responses.MessageResponse, error) {
+	task, err := s.taskRepo.GetByID(dto.TaskID, senderID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return responses.MessageResponse{}, ErrSharedTaskNotFound
+		}
+
+		return responses.MessageResponse{}, err
+	}
+
+	messageContent := strings.TrimSpace(dto.Content)
+	if messageContent == "" {
+		messageContent = "Shared a task"
+	}
+
+	msg := models.Message{
+		Type:                 models.MessageTypeSharedTask,
+		SenderID:             senderID,
+		ReceiverID:           dto.ToUserID,
+		Content:              messageContent,
+		SharedTaskSourceID:   &task.ID,
+		SharedTaskTitle:      task.Title,
+		SharedTaskNotes:      task.Notes,
+		SharedTaskGroupName:  task.Group.Name,
+		SharedTaskGroupColor: task.Group.Color,
+	}
+
+	return s.createAndLoadMessage(&msg)
+}
+
+func (s *MessageService) createAndLoadMessage(msg *models.Message) (responses.MessageResponse, error) {
+	created, err := s.repo.Create(msg)
 	if err != nil {
 		return responses.MessageResponse{}, err
 	}
 
-	fullMsgs, _, _ := s.repo.GetMessages(senderID, dto.ToUserID, 1, 1)
-	if len(fullMsgs) > 0 {
-		return responses.NewMessageResponse(fullMsgs[0]), nil
+	fullMsg, err := s.repo.GetByID(created.ID)
+	if err == nil {
+		return responses.NewMessageResponse(fullMsg), nil
 	}
 
 	return responses.NewMessageResponse(*created), nil

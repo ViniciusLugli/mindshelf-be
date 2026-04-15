@@ -20,6 +20,12 @@ type GetAllTasksByTitle struct {
 	Limit int    `form:"limit" binding:"min=1,max=300,required"`
 }
 
+type GetAllTasksByGroup struct {
+	GroupID uuid.UUID `uri:"groupID" binding:"required,uuid"`
+	Page    int       `form:"page" binding:"min=1,required"`
+	Limit   int       `form:"limit" binding:"min=1,max=300,required"`
+}
+
 type CreateTaskRequest struct {
 	Title   string    `json:"title" binding:"required"`
 	Notes   string    `json:"notes"`

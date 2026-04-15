@@ -20,6 +20,7 @@ func (h *FriendHandlers) Register(r *ws.Router) {
 	r.On("send_friend_request", h.SendFriendRequest)
 	r.On("accept_friend_request", h.AcceptFriendRequest)
 	r.On("reject_friend_request", h.RejectFriendRequest)
+	r.On("remove_friend", h.RemoveFriend)
 	r.On("get_friends", h.GetFriends)
 }
 
@@ -69,6 +70,22 @@ func (h *FriendHandlers) RejectFriendRequest(cl *ws.Client, payload json.RawMess
 	}
 
 	cl.Send("reject_friend_request", "friendship rejected")
+}
+
+func (h *FriendHandlers) RemoveFriend(cl *ws.Client, payload json.RawMessage) {
+	var dto requests.FriendRequest
+	if err := json.Unmarshal(payload, &dto); err != nil {
+		cl.SendError("remove_friend", "invalid payload")
+		return
+	}
+
+	err := h.service.RemoveFriend(cl.UserID, dto)
+	if err != nil {
+		cl.SendError("remove_friend", err.Error())
+		return
+	}
+
+	cl.Send("remove_friend", "friend removed")
 }
 
 func (h *FriendHandlers) GetFriends(cl *ws.Client, payload json.RawMessage) {

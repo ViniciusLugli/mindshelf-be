@@ -111,6 +111,10 @@ func (s *UserService) RejectFriendRequest(userID uuid.UUID, dto requests.FriendR
 	return s.repo.RejectFriendRequest(userID, dto.FriendID)
 }
 
+func (s *UserService) RemoveFriend(userID uuid.UUID, dto requests.FriendRequest) error {
+	return s.repo.RemoveFriend(userID, dto.FriendID)
+}
+
 func (s *UserService) GetFriends(userID uuid.UUID) ([]responses.UserResponse, error) {
 	friends, err := s.repo.GetFriends(userID)
 	if err != nil {

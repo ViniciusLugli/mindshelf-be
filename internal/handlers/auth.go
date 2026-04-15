@@ -32,6 +32,7 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 // @Param user body requests.CreateUserRequest true "User data"
 // @Success 201 {object} responses.AuthResponse
 // @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -71,6 +72,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Param credentials body requests.LoginRequest true "Credentials"
 // @Success 200 {object} responses.AuthResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {

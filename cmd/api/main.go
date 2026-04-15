@@ -93,6 +93,7 @@ func main() {
 		taskRoute := protected.Group("/task")
 		taskRoute.GET("/", taskHandler.GetTask)
 		taskRoute.GET("/all", taskHandler.GetAllTasks)
+		taskRoute.GET("/group/:groupID", taskHandler.GetAllTasksByGroup)
 		taskRoute.GET("/:title", taskHandler.GetAllTasksByTitle)
 		taskRoute.POST("/create", taskHandler.Create)
 		taskRoute.PATCH("/update", taskHandler.Update)
@@ -102,7 +103,7 @@ func main() {
 	// WebSocket
 
 	chatRepository := repositories.NewMessageRepository(db)
-	chatService := services.NewMessageService(chatRepository)
+	chatService := services.NewMessageService(chatRepository, taskRepository)
 
 	hub := util.NewHub()
 	wsRouter := util.NewRouter()

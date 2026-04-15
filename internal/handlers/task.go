@@ -32,6 +32,7 @@ func NewTaskHandler(service *services.TaskService) *TaskHandler {
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/task/create [post]
 func (h *TaskHandler) Create(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/task/update [patch]
 func (h *TaskHandler) Update(c *gin.Context) {
@@ -128,6 +130,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 // @Success 204 {string} string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/task/delete [delete]
 func (h *TaskHandler) Delete(c *gin.Context) {
@@ -256,6 +259,61 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// GetAllTasksByGroup godoc
+// @Summary Get paginated tasks by group
+// @Tags task
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param groupID path string true "Group ID"
+// @Param page query int true "page"
+// @Param limit query int true "limit"
+// @Success 200 {object} responses.PaginatedTaskResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/group/{groupID} [get]
+func (h *TaskHandler) GetAllTasksByGroup(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var dto requests.GetAllTasksByGroup
+	if err := c.ShouldBindUri(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := c.ShouldBindQuery(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tasks, err := h.service.GetAllTasksByGroup(dto, userID)
+	if err != nil {
+		if errors.Is(err, services.ErrTaskGroupNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}
+
 // GetAllTasksByTitle godoc
 // @Summary Get paginated tasks by title
 // @Tags task
@@ -268,6 +326,7 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 // @Success 200 {object} responses.PaginatedTaskResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/task/{title} [get]
 func (h *TaskHandler) GetAllTasksByTitle(c *gin.Context) {

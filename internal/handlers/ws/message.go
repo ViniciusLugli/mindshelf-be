@@ -21,6 +21,7 @@ func NewChatHandler(msgSvc *services.MessageService, hub *util.Hub) *ChatHandler
 
 func (h *ChatHandler) Register(r *ws.Router) {
 	r.On("send_message", h.SendMessage)
+	r.On("share_task", h.ShareTask)
 	r.On("get_conversation", h.GetConversation)
 	r.On("get_chats", h.GetChats)
 	r.On("mark_messages_read", h.MarkMessagesRead)
@@ -41,6 +42,23 @@ func (h *ChatHandler) SendMessage(cl *ws.Client, payload json.RawMessage) {
 
 	cl.Send("message_sent", msg)
 
+	h.hub.SendToUser(dto.ToUserID, "message_received", msg)
+}
+
+func (h *ChatHandler) ShareTask(cl *ws.Client, payload json.RawMessage) {
+	var dto requests.ShareTaskRequest
+	if err := json.Unmarshal(payload, &dto); err != nil {
+		cl.SendError("share_task", "invalid payload")
+		return
+	}
+
+	msg, err := h.msgService.ShareTask(cl.UserID, dto)
+	if err != nil {
+		cl.SendError("share_task", err.Error())
+		return
+	}
+
+	cl.Send("message_sent", msg)
 	h.hub.SendToUser(dto.ToUserID, "message_received", msg)
 }
 

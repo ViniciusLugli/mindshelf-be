@@ -74,6 +74,7 @@ func (h *GroupHandler) Create(c *gin.Context) {
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/group/update [patch]
 func (h *GroupHandler) Update(c *gin.Context) {
@@ -122,8 +123,9 @@ func (h *GroupHandler) Update(c *gin.Context) {
 // @Success 204 {string} string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/group/delete [post]
+// @Router /api/group/delete [delete]
 func (h *GroupHandler) Delete(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {

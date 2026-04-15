@@ -24,6 +24,12 @@ func (r *MessageRepository) Create(message *models.Message) (*models.Message, er
 	return message, nil
 }
 
+func (r *MessageRepository) GetByID(id uuid.UUID) (models.Message, error) {
+	var message models.Message
+	err := r.db.Preload("Sender").Preload("Receiver").First(&message, "id = ?", id).Error
+	return message, err
+}
+
 func (r *MessageRepository) GetMessages(userID, correspondentID uuid.UUID, page, limit int) ([]models.Message, int64, error) {
 	var messages []models.Message
 	var total int64
