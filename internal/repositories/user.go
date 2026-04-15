@@ -109,9 +109,10 @@ func (r *UserRepository) RemoveFriend(userID, friendID uuid.UUID) error {
 func (r *UserRepository) GetFriends(userID uuid.UUID) ([]models.User, error) {
 	var friends []models.User
 	err := r.db.
+		Distinct("users.id", "users.name", "users.email", "users.password", "users.avatar_url", "users.created_at", "users.updated_at", "users.deleted_at").
 		Joins("JOIN user_friends ON user_friends.friend_id = users.id OR user_friends.user_id = users.id").
-		Where("(user_friends.user_id = ? OR user_friends.friend_id = ?) AND user_friends.status = 'accepted' AND users.id != ?",
-			userID, userID, userID).
+		Where("(user_friends.user_id = ? OR user_friends.friend_id = ?) AND user_friends.status = ? AND users.id != ?",
+			userID, userID, models.Accepted, userID).
 		Find(&friends).Error
 	return friends, err
 }

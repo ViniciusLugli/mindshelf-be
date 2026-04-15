@@ -30,7 +30,7 @@ func (r *TaskRepository) GetByID(id uuid.UUID, userID uuid.UUID) (models.Task, e
 	var task models.Task
 	err := r.db.
 		Joins("Group").
-		Where("tasks.id = ? AND groups.user_id = ?", id, userID).
+		Where(`tasks.id = ? AND "Group"."user_id" = ?`, id, userID).
 		First(&task).Error
 	return task, err
 }
@@ -39,7 +39,7 @@ func (r *TaskRepository) GetByTitle(title string, userID uuid.UUID) (models.Task
 	var task models.Task
 	err := r.db.
 		Joins("Group").
-		Where("tasks.title = ? AND groups.user_id = ?", title, userID).
+		Where(`tasks.title = ? AND "Group"."user_id" = ?`, title, userID).
 		First(&task).Error
 
 	return task, err
@@ -51,7 +51,7 @@ func (r *TaskRepository) GetAllByTitle(title string, limit, offset int, userID u
 
 	base := r.db.Model(&models.Task{}).
 		Joins("Group").
-		Where("tasks.title LIKE ? AND groups.user_id = ?", "%"+title+"%", userID)
+		Where(`tasks.title LIKE ? AND "Group"."user_id" = ?`, "%"+title+"%", userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
@@ -68,7 +68,7 @@ func (r *TaskRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.T
 	var tasks []models.Task
 	var count int64
 
-	base := r.db.Model(&models.Task{}).Joins("Group").Where("groups.user_id = ?", userID)
+	base := r.db.Model(&models.Task{}).Joins("Group").Where(`"Group"."user_id" = ?`, userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
@@ -87,7 +87,7 @@ func (r *TaskRepository) GetAllByGroupID(groupID uuid.UUID, limit, offset int, u
 
 	base := r.db.Model(&models.Task{}).
 		Joins("Group").
-		Where("tasks.group_id = ? AND groups.user_id = ?", groupID, userID)
+		Where(`tasks.group_id = ? AND "Group"."user_id" = ?`, groupID, userID)
 
 	if err := base.Count(&count).Error; err != nil {
 		return nil, 0, err
