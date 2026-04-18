@@ -22,6 +22,43 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
+// GetCurrentUser godoc
+// @Summary Get authenticated user
+// @Tags user
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} responses.UserResponse
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/users/me [get]
+func (h *UserHandler) GetCurrentUser(c *gin.Context) {
+	userID, err := middlewares.GetAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	user, err := h.service.GetUserByID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "user not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 // Update godoc
 // @Summary Update authenticated user
 // @Tags user
@@ -34,7 +71,7 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/user/update [patch]
+// @Router /api/users/me [patch]
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -80,7 +117,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/user/delete [delete]
+// @Router /api/users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, err := middlewares.GetAuthenticatedUserID(c)
 	if err != nil {
@@ -107,63 +144,58 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// GetUser godoc
-// @Summary Get user by id or email
+// GetUserByID godoc
+// @Summary Get user by ID
 // @Tags user
 // @Security ApiKeyAuth
-// @Accept json
 // @Produce json
-// @Param id query string false "User ID"
-// @Param email query string false "User email"
+// @Param id path string true "User ID"
 // @Success 200 {object} responses.UserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/user/ [get]
-func (h *UserHandler) GetUser(c *gin.Context) {
-	var dto requests.GetUser
-	if err := c.ShouldBindQuery(&dto); err != nil {
+// @Router /api/users/{id} [get]
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	var dto requests.GetUserByID
+	if err := c.ShouldBindUri(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	user, err := h.service.GetUser(dto)
+	user, err := h.service.GetUserByID(dto.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "user not found",
 			})
-
-			return
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-
 			return
 		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, user)
 }
 
 // GetAllUsers godoc
-// @Summary Get paginated users
+// @Summary List users
 // @Tags user
 // @Security ApiKeyAuth
-// @Accept json
 // @Produce json
-// @Param page query int false "page"
-// @Param limit query int false "limit"
+// @Param name query string false "User name filter"
+// @Param page query int true "page"
+// @Param limit query int true "limit"
 // @Success 200 {object} responses.PaginatedUserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/user/all [get]
-
+// @Router /api/users [get]
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	var dto requests.GetAllUsers
 	if err := c.ShouldBindQuery(&dto); err != nil {
@@ -174,47 +206,6 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	}
 
 	users, err := h.service.GetAllUsers(dto)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
-		return
-	}
-
-	c.JSON(http.StatusOK, users)
-}
-
-// GetAllUsersByName godoc
-// @Summary Get paginated users by name
-// @Tags user
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param name path string true "User name"
-// @Param page query int true "page"
-// @Param limit query int true "limit"
-// @Success 200 {object} responses.PaginatedUserResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/user/{name} [get]
-func (h *UserHandler) GetAllUsersByName(c *gin.Context) {
-	var dto requests.GetAllUsersByName
-
-	if err := c.ShouldBindUri(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	if err := c.ShouldBindQuery(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	users, err := h.service.GetAllUsersByName(dto)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

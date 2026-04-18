@@ -5,18 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetUser struct {
-	ID    uuid.UUID `form:"id" binding:"uuid"`
-	Email string    `form:"email"`
+type GetUserByID struct {
+	ID uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
 }
 
 type GetAllUsers struct {
-	Page  int `form:"page" binding:"min=1,required"`
-	Limit int `form:"limit" binding:"min=1,max=300,required"`
-}
-
-type GetAllUsersByName struct {
-	Name  string `uri:"name" binding:"required"`
+	Name  string `form:"name"`
 	Page  int    `form:"page" binding:"min=1,required"`
 	Limit int    `form:"limit" binding:"min=1,max=300,required"`
 }

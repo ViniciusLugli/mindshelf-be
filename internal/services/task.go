@@ -21,18 +21,27 @@ func NewTaskService(repo *repositories.TaskRepository, groupRepo *repositories.G
 	return &TaskService{repo: repo, groupRepo: groupRepo}
 }
 
-func (s *TaskService) Create(dto requests.CreateTaskRequest, userID uuid.UUID) error {
+func (s *TaskService) Create(dto requests.CreateTaskRequest, userID uuid.UUID) (responses.TaskResponse, error) {
 	exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
 	if err != nil {
-		return err
+		return responses.TaskResponse{}, err
 	}
 
 	if !exists {
-		return ErrTaskGroupNotFound
+		return responses.TaskResponse{}, ErrTaskGroupNotFound
 	}
 
 	task := dto.ToModel()
-	return s.repo.Create(&task)
+	if err := s.repo.Create(&task); err != nil {
+		return responses.TaskResponse{}, err
+	}
+
+	createdTask, err := s.repo.GetByID(task.ID, userID)
+	if err != nil {
+		return responses.TaskResponse{}, err
+	}
+
+	return responses.NewTaskResponse(createdTask), nil
 }
 
 func (s *TaskService) Update(dto requests.UpdateTaskRequest, userID uuid.UUID) error {
@@ -71,42 +80,23 @@ func (s *TaskService) GetTask(dto requests.GetTask, userID uuid.UUID) (responses
 }
 
 func (s *TaskService) GetAllTasks(dto requests.GetAllTasks, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
-	offset := (dto.Page - 1) * dto.Limit
+	var groupID *uuid.UUID
+	if dto.GroupID != uuid.Nil {
+		exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
+		if err != nil {
+			return responses.PaginatedResponse[responses.TaskResponse]{}, err
+		}
 
-	tasks, count, err := s.repo.GetAll(dto.Limit, offset, userID)
-	if err != nil {
-		return responses.PaginatedResponse[responses.TaskResponse]{}, err
-	}
+		if !exists {
+			return responses.PaginatedResponse[responses.TaskResponse]{}, ErrTaskGroupNotFound
+		}
 
-	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
-	return responses.NewPaginatedResponse(tasks, responses.NewTaskResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
-}
-
-func (s *TaskService) GetAllTasksByTitle(dto requests.GetAllTasksByTitle, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
-	offset := (dto.Page - 1) * dto.Limit
-
-	tasks, count, err := s.repo.GetAllByTitle(dto.Title, dto.Limit, offset, userID)
-	if err != nil {
-		return responses.PaginatedResponse[responses.TaskResponse]{}, err
-	}
-
-	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
-	return responses.NewPaginatedResponse(tasks, responses.NewTaskResponse, count, dto.Page, dto.Limit, int(totalPages)), nil
-}
-
-func (s *TaskService) GetAllTasksByGroup(dto requests.GetAllTasksByGroup, userID uuid.UUID) (responses.PaginatedResponse[responses.TaskResponse], error) {
-	exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
-	if err != nil {
-		return responses.PaginatedResponse[responses.TaskResponse]{}, err
-	}
-
-	if !exists {
-		return responses.PaginatedResponse[responses.TaskResponse]{}, ErrTaskGroupNotFound
+		groupID = &dto.GroupID
 	}
 
 	offset := (dto.Page - 1) * dto.Limit
 
-	tasks, count, err := s.repo.GetAllByGroupID(dto.GroupID, dto.Limit, offset, userID)
+	tasks, count, err := s.repo.GetAllFiltered(dto.Title, groupID, dto.Limit, offset, userID)
 	if err != nil {
 		return responses.PaginatedResponse[responses.TaskResponse]{}, err
 	}

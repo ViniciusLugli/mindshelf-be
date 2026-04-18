@@ -6,6 +6,7 @@ import (
 )
 
 type TaskResponse struct {
+	ID         uuid.UUID `json:"id"`
 	Title      string    `json:"title"`
 	Notes      string    `json:"notes"`
 	GroupID    uuid.UUID `json:"group_id"`
@@ -15,6 +16,7 @@ type TaskResponse struct {
 
 func NewTaskResponse(task models.Task) TaskResponse {
 	return TaskResponse{
+		ID:         task.ID,
 		Title:      task.Title,
 		Notes:      task.Notes,
 		GroupID:    task.GroupID,

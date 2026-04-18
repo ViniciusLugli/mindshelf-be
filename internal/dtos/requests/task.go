@@ -6,22 +6,12 @@ import (
 )
 
 type GetTask struct {
-	ID uuid.UUID `form:"id" binding:"required,uuid"`
+	ID uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
 }
 
 type GetAllTasks struct {
-	Page  int `form:"page" binding:"min=1,required"`
-	Limit int `form:"limit" binding:"min=1,max=300,required"`
-}
-
-type GetAllTasksByTitle struct {
-	Title string `uri:"title" binding:"required"`
-	Page  int    `form:"page" binding:"min=1,required"`
-	Limit int    `form:"limit" binding:"min=1,max=300,required"`
-}
-
-type GetAllTasksByGroup struct {
-	GroupID uuid.UUID `uri:"groupID" binding:"required,uuid"`
+	Title   string    `form:"title"`
+	GroupID uuid.UUID `form:"group_id,parser=encoding.TextUnmarshaler" binding:"omitempty,uuid"`
 	Page    int       `form:"page" binding:"min=1,required"`
 	Limit   int       `form:"limit" binding:"min=1,max=300,required"`
 }
@@ -33,13 +23,13 @@ type CreateTaskRequest struct {
 }
 
 type UpdateTaskRequest struct {
-	ID    uuid.UUID `json:"id" binding:"required,uuid"`
+	ID    uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
 	Title string    `json:"title"`
 	Notes string    `json:"notes"`
 }
 
 type DeleteTaskRequest struct {
-	ID uuid.UUID `json:"id" binding:"required,uuid"`
+	ID uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
 }
 
 func (d *CreateTaskRequest) ToModel() models.Task {

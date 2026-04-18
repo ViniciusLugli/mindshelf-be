@@ -5,6 +5,7 @@ import (
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
+	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/google/uuid"
 )
@@ -50,23 +51,21 @@ func (s *GroupService) GetGroupByID(dto requests.GetGroupByID, userID uuid.UUID)
 	return responses.NewGroupRespone(group), nil
 }
 
-func (s *GroupService) GetGroupByName(dto requests.GetAllGroupsByName, userID uuid.UUID) (responses.PaginatedResponse[responses.GroupResponse], error) {
-	offset := (dto.Page - 1) * dto.Limit
-
-	groups, count, err := s.repo.GetAllByName(dto.Name, dto.Limit, offset, userID)
-	if err != nil {
-		return responses.PaginatedResponse[responses.GroupResponse]{}, err
-	}
-
-	totalPages := math.Ceil(float64(count) / float64(dto.Limit))
-
-	return responses.NewPaginatedResponse(groups, responses.NewGroupRespone, count, dto.Page, dto.Limit, int(totalPages)), nil
-}
-
 func (s *GroupService) GetAll(dto requests.GetAllGroups, userID uuid.UUID) (responses.PaginatedResponse[responses.GroupResponse], error) {
 	offset := (dto.Page - 1) * dto.Limit
 
-	groups, count, err := s.repo.GetAll(dto.Limit, offset, userID)
+	var (
+		groups []models.Group
+		count  int64
+		err    error
+	)
+
+	if dto.Name != "" {
+		groups, count, err = s.repo.GetAllByName(dto.Name, dto.Limit, offset, userID)
+	} else {
+		groups, count, err = s.repo.GetAll(dto.Limit, offset, userID)
+	}
+
 	if err != nil {
 		return responses.PaginatedResponse[responses.GroupResponse]{}, err
 	}

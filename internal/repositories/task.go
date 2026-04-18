@@ -84,6 +84,31 @@ func (r *TaskRepository) GetAll(limit, offset int, userID uuid.UUID) ([]models.T
 	return tasks, count, nil
 }
 
+func (r *TaskRepository) GetAllFiltered(title string, groupID *uuid.UUID, limit, offset int, userID uuid.UUID) ([]models.Task, int64, error) {
+	var tasks []models.Task
+	var count int64
+
+	base := r.db.Model(&models.Task{}).Where("tasks.group_id IN (?)", r.userGroupsSubquery(userID))
+
+	if title != "" {
+		base = base.Where("tasks.title LIKE ?", "%"+title+"%")
+	}
+
+	if groupID != nil {
+		base = base.Where("tasks.group_id = ?", *groupID)
+	}
+
+	if err := base.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := base.Preload("Group").Limit(limit).Offset(offset).Find(&tasks).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return tasks, count, nil
+}
+
 func (r *TaskRepository) GetAllByGroupID(groupID uuid.UUID, limit, offset int, userID uuid.UUID) ([]models.Task, int64, error) {
 	var tasks []models.Task
 	var count int64

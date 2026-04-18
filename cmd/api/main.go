@@ -70,34 +70,30 @@ func main() {
 	// API
 
 	{
-		userRoute := protected.Group("/user")
-		userRoute.GET("/", userHandler.GetUser)
-		userRoute.GET("/all", userHandler.GetAllUsers)
-		userRoute.GET("/:name", userHandler.GetAllUsersByName)
-		userRoute.PATCH("/update", userHandler.Update)
-		userRoute.DELETE("/delete", userHandler.Delete)
+		userRoute := protected.Group("/users")
+		userRoute.GET("", userHandler.GetAllUsers)
+		userRoute.GET("/me", userHandler.GetCurrentUser)
+		userRoute.GET("/:id", userHandler.GetUserByID)
+		userRoute.PATCH("/me", userHandler.Update)
+		userRoute.DELETE("/me", userHandler.Delete)
 	}
 
 	{
-		groupRoute := protected.Group("/group")
-		groupRoute.GET("/", groupHandler.GetAllGroups)
-		groupRoute.GET("/id/:id", groupHandler.GetGroupByID)
-		groupRoute.GET("/name/:name", groupHandler.GetAllGroupsByName)
-		groupRoute.POST("/create", groupHandler.Create)
-		groupRoute.PATCH("/update", groupHandler.Update)
-		groupRoute.POST("/delete", groupHandler.Delete)
-		groupRoute.DELETE("/delete", groupHandler.Delete)
+		groupRoute := protected.Group("/groups")
+		groupRoute.GET("", groupHandler.GetAllGroups)
+		groupRoute.GET("/:id", groupHandler.GetGroupByID)
+		groupRoute.POST("", groupHandler.Create)
+		groupRoute.PATCH("/:id", groupHandler.Update)
+		groupRoute.DELETE("/:id", groupHandler.Delete)
 	}
 
 	{
-		taskRoute := protected.Group("/task")
-		taskRoute.GET("/", taskHandler.GetTask)
-		taskRoute.GET("/all", taskHandler.GetAllTasks)
-		taskRoute.GET("/group/:groupID", taskHandler.GetAllTasksByGroup)
-		taskRoute.GET("/:title", taskHandler.GetAllTasksByTitle)
-		taskRoute.POST("/create", taskHandler.Create)
-		taskRoute.PATCH("/update", taskHandler.Update)
-		taskRoute.DELETE("/delete", taskHandler.Delete)
+		taskRoute := protected.Group("/tasks")
+		taskRoute.GET("", taskHandler.GetAllTasks)
+		taskRoute.GET("/:id", taskHandler.GetTask)
+		taskRoute.POST("", taskHandler.Create)
+		taskRoute.PATCH("/:id", taskHandler.Update)
+		taskRoute.DELETE("/:id", taskHandler.Delete)
 	}
 
 	// WebSocket

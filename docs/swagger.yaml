@@ -35,13 +35,6 @@ definitions:
     - name
     - password
     type: object
-  requests.DeleteTaskRequest:
-    properties:
-      id:
-        type: string
-    required:
-    - id
-    type: object
   requests.FriendRequest:
     properties:
       friend_id:
@@ -254,6 +247,8 @@ definitions:
         type: string
       group_name:
         type: string
+      id:
+        type: string
       notes:
         type: string
       title:
@@ -277,11 +272,13 @@ info:
   title: Mindshelf API
   version: "1.0"
 paths:
-  /api/group/:
+  /api/groups:
     get:
-      consumes:
-      - application/json
       parameters:
+      - description: Group name filter
+        in: query
+        name: name
+        type: string
       - description: page
         in: query
         name: page
@@ -319,10 +316,9 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get paginated groups
+      summary: List groups
       tags:
       - group
-  /api/group/create:
     post:
       consumes:
       - application/json
@@ -365,11 +361,11 @@ paths:
       summary: Create a group
       tags:
       - group
-  /api/group/delete:
+  /api/groups/{id}:
     delete:
       parameters:
       - description: Group ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -409,10 +405,7 @@ paths:
       summary: Delete a group
       tags:
       - group
-  /api/group/id/{id}:
     get:
-      consumes:
-      - application/json
       parameters:
       - description: Group ID
         in: path
@@ -455,61 +448,15 @@ paths:
       summary: Get group by ID
       tags:
       - group
-  /api/group/name/{name}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Group name
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: page
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.PaginatedGroupResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get paginated groups by name
-      tags:
-      - group
-  /api/group/update:
     patch:
       consumes:
       - application/json
       parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Group data
         in: body
         name: group
@@ -554,13 +501,157 @@ paths:
       summary: Update a group
       tags:
       - group
-  /api/task/:
+  /api/tasks:
     get:
+      parameters:
+      - description: Task title filter
+        in: query
+        name: title
+        type: string
+      - description: Group ID filter
+        in: query
+        name: group_id
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List tasks
+      tags:
+      - task
+    post:
       consumes:
       - application/json
       parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new task
+      tags:
+      - task
+  /api/tasks/{id}:
+    delete:
+      parameters:
       - description: Task ID
-        in: query
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a task
+      tags:
+      - task
+    get:
+      parameters:
+      - description: Task ID
+        in: path
         name: id
         required: true
         type: string
@@ -600,262 +691,15 @@ paths:
       summary: Get task by ID
       tags:
       - task
-  /api/task/{title}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Task title
-        in: path
-        name: title
-        required: true
-        type: string
-      - description: page
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.PaginatedTaskResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get paginated tasks by title
-      tags:
-      - task
-  /api/task/all:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: page
-        in: query
-        name: page
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.PaginatedTaskResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get paginated tasks
-      tags:
-      - task
-  /api/task/create:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Task data
-        in: body
-        name: task
-        required: true
-        schema:
-          $ref: '#/definitions/requests.CreateTaskRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create a new task
-      tags:
-      - task
-  /api/task/delete:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: Delete task
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/requests.DeleteTaskRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a task
-      tags:
-      - task
-  /api/task/group/{groupID}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Group ID
-        in: path
-        name: groupID
-        required: true
-        type: string
-      - description: page
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: limit
-        in: query
-        name: limit
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.PaginatedTaskResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get paginated tasks by group
-      tags:
-      - task
-  /api/task/update:
     patch:
       consumes:
       - application/json
       parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Task data
         in: body
         name: task
@@ -900,64 +744,12 @@ paths:
       summary: Update a task
       tags:
       - task
-  /api/user/:
+  /api/users:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: User ID
+      - description: User name filter
         in: query
-        name: id
-        type: string
-      - description: User email
-        in: query
-        name: email
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get user by id or email
-      tags:
-      - user
-  /api/user/{name}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: User name
-        in: path
         name: name
-        required: true
         type: string
       - description: page
         in: query
@@ -996,10 +788,54 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get paginated users by name
+      summary: List users
       tags:
       - user
-  /api/user/delete:
+  /api/users/{id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by ID
+      tags:
+      - user
+  /api/users/me:
     delete:
       produces:
       - application/json
@@ -1031,7 +867,37 @@ paths:
       summary: Delete authenticated user
       tags:
       - user
-  /api/user/update:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get authenticated user
+      tags:
+      - user
     patch:
       consumes:
       - application/json
