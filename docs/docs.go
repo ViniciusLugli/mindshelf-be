@@ -1747,10 +1747,12 @@ const docTemplate = `{
         "requests.UpdateGroupRequest": {
             "type": "object",
             "required": [
-                "id",
-                "name"
+                "id"
             ],
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },

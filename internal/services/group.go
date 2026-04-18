@@ -29,7 +29,14 @@ func (s *GroupService) Update(dto requests.UpdateGroupRequest, userID uuid.UUID)
 		return err
 	}
 
-	group.Name = dto.Name
+	if dto.Name != "" {
+		group.Name = dto.Name
+	}
+
+	if dto.Color != "" {
+		group.Color = dto.Color
+	}
+
 	return s.repo.Update(&group)
 }
 

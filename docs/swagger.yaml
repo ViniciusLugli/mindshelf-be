@@ -82,13 +82,14 @@ definitions:
     type: object
   requests.UpdateGroupRequest:
     properties:
+      color:
+        type: string
       id:
         type: string
       name:
         type: string
     required:
     - id
-    - name
     type: object
   requests.UpdateTaskRequest:
     properties:

@@ -21,8 +21,9 @@ type CreateGroupRequest struct {
 }
 
 type UpdateGroupRequest struct {
-	ID   uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
-	Name string    `json:"name" binding:"required"`
+	ID    uuid.UUID `uri:"id,parser=encoding.TextUnmarshaler" binding:"required,uuid"`
+	Name  string    `json:"name"`
+	Color string    `json:"color"`
 }
 
 type DeleteGroupRequest struct {
