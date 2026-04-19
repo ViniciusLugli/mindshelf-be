@@ -2,17 +2,15 @@ package repositories
 
 import (
 	"errors"
-	"os"
+
+	"github.com/ViniciusLugli/mindshelf/internal/utils/envutil"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func ConnectDB() (*gorm.DB, error) {
-	dsn := os.Getenv("DSN")
-	if dsn == "" {
-		dsn = os.Getenv("DATABASE_URL")
-	}
+	dsn := envutil.DatabaseDSN()
 
 	if dsn == "" {
 		return nil, errors.New("DSN or DATABASE_URL is not configured")

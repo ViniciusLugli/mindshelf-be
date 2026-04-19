@@ -7,26 +7,26 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/ViniciusLugli/mindshelf/internal/utils/envutil"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	err := godotenv.Load()
+	err := envutil.LoadDotEnvIfPresent()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("warning: failed to load .env file: %v", err)
 	}
 
 	if len(os.Args) < 2 {
 		log.Fatal("use: go run ./cmd/down_migrate <number | all | wipe | force> [args]")
 	}
 
-	dbURL := os.Getenv("DATABASE_URL")
+	dbURL := envutil.DatabaseDSN()
 	if dbURL == "" {
-		dbURL = os.Getenv("DSN")
+		log.Fatal("DATABASE_URL or DSN is not configured")
 	}
 
 	arg := os.Args[1]

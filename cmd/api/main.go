@@ -16,10 +16,10 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/middlewares"
 	"github.com/ViniciusLugli/mindshelf/internal/repositories"
 	"github.com/ViniciusLugli/mindshelf/internal/services"
+	"github.com/ViniciusLugli/mindshelf/internal/utils/envutil"
 	"github.com/ViniciusLugli/mindshelf/internal/utils/logger"
 	util "github.com/ViniciusLugli/mindshelf/internal/utils/ws"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 
 	_ "github.com/ViniciusLugli/mindshelf/docs"
 	swaggerFiles "github.com/swaggo/files"
@@ -29,12 +29,12 @@ import (
 func main() {
 	appLogger := logger.New("mindshelf-api")
 
-	repositories.RunUpMigrations()
-
-	err := godotenv.Load()
+	err := envutil.LoadDotEnvIfPresent()
 	if err != nil {
 		appLogger.Warn("failed to load .env file", "error", err)
 	}
+
+	repositories.RunUpMigrations()
 
 	db, err := repositories.ConnectDB()
 	if err != nil {
