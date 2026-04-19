@@ -372,6 +372,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/shared-tasks/import": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shared-task"
+                ],
+                "summary": "Import a shared task snapshot",
+                "parameters": [
+                    {
+                        "description": "Import shared task payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.ImportSharedTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.TaskResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/responses.TaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/tasks": {
             "get": {
                 "security": [
@@ -1693,6 +1773,21 @@ const docTemplate = `{
                 }
             }
         },
+        "requests.ImportSharedTaskRequest": {
+            "type": "object",
+            "required": [
+                "group_id",
+                "message_id"
+            ],
+            "properties": {
+                "group_id": {
+                    "type": "string"
+                },
+                "message_id": {
+                    "type": "string"
+                }
+            }
+        },
         "requests.LoginRequest": {
             "type": "object",
             "required": [
@@ -1970,6 +2065,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "group_name": {
+                    "type": "string"
+                },
+                "imported_task_id": {
                     "type": "string"
                 },
                 "notes": {

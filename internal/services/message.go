@@ -13,14 +13,16 @@ import (
 )
 
 var ErrSharedTaskNotFound = errors.New("task not found")
+var ErrSharedTaskMessageNotFound = errors.New("shared task message not found")
 
 type MessageService struct {
-	repo     *repositories.MessageRepository
-	taskRepo *repositories.TaskRepository
+	repo      *repositories.MessageRepository
+	taskRepo  *repositories.TaskRepository
+	groupRepo *repositories.GroupRepository
 }
 
-func NewMessageService(repo *repositories.MessageRepository, taskRepo *repositories.TaskRepository) *MessageService {
-	return &MessageService{repo: repo, taskRepo: taskRepo}
+func NewMessageService(repo *repositories.MessageRepository, taskRepo *repositories.TaskRepository, groupRepo *repositories.GroupRepository) *MessageService {
+	return &MessageService{repo: repo, taskRepo: taskRepo, groupRepo: groupRepo}
 }
 
 func (s *MessageService) GetMessages(userID, correspondentID uuid.UUID, page, limit int) (responses.PaginatedResponse[responses.MessageResponse], error) {
@@ -81,6 +83,73 @@ func (s *MessageService) ShareTask(senderID uuid.UUID, dto requests.ShareTaskReq
 	}
 
 	return s.createAndLoadMessage(&msg)
+}
+
+func (s *MessageService) ImportSharedTask(userID uuid.UUID, dto requests.ImportSharedTaskRequest) (responses.TaskResponse, bool, error) {
+	exists, err := s.groupRepo.ExistsByIDAndUserID(dto.GroupID, userID)
+	if err != nil {
+		return responses.TaskResponse{}, false, err
+	}
+
+	if !exists {
+		return responses.TaskResponse{}, false, ErrTaskGroupNotFound
+	}
+
+	var (
+		importedTaskID uuid.UUID
+		created        bool
+	)
+
+	err = s.repo.WithTransaction(func(tx *gorm.DB) error {
+		message, err := s.repo.GetSharedTaskMessageForReceiverTx(tx, dto.MessageID, userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrSharedTaskMessageNotFound
+			}
+
+			return err
+		}
+
+		if message.ImportedTaskID != nil {
+			existingTask, err := s.taskRepo.GetByIDTx(tx, *message.ImportedTaskID, userID)
+			if err == nil {
+				importedTaskID = existingTask.ID
+				return nil
+			}
+
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+		}
+
+		task := models.Task{
+			Title:   message.SharedTaskTitle,
+			Notes:   message.SharedTaskNotes,
+			GroupID: dto.GroupID,
+		}
+
+		if err := s.taskRepo.CreateTx(tx, &task); err != nil {
+			return err
+		}
+
+		if err := s.repo.SetImportedTaskTx(tx, message.ID, task.ID); err != nil {
+			return err
+		}
+
+		importedTaskID = task.ID
+		created = true
+		return nil
+	})
+	if err != nil {
+		return responses.TaskResponse{}, false, err
+	}
+
+	task, err := s.taskRepo.GetByID(importedTaskID, userID)
+	if err != nil {
+		return responses.TaskResponse{}, false, err
+	}
+
+	return responses.NewTaskResponse(task), created, nil
 }
 
 func (s *MessageService) createAndLoadMessage(msg *models.Message) (responses.MessageResponse, error) {

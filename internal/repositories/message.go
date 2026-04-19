@@ -6,6 +6,7 @@ import (
 	"github.com/ViniciusLugli/mindshelf/internal/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type MessageRepository struct {
@@ -28,6 +29,25 @@ func (r *MessageRepository) GetByID(id uuid.UUID) (models.Message, error) {
 	var message models.Message
 	err := r.db.Preload("Sender").Preload("Receiver").First(&message, "id = ?", id).Error
 	return message, err
+}
+
+func (r *MessageRepository) WithTransaction(fn func(tx *gorm.DB) error) error {
+	return r.db.Transaction(fn)
+}
+
+func (r *MessageRepository) GetSharedTaskMessageForReceiverTx(tx *gorm.DB, id, receiverID uuid.UUID) (models.Message, error) {
+	var message models.Message
+	err := tx.
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ? AND receiver_id = ? AND type = ?", id, receiverID, models.MessageTypeSharedTask).
+		First(&message).Error
+	return message, err
+}
+
+func (r *MessageRepository) SetImportedTaskTx(tx *gorm.DB, messageID, taskID uuid.UUID) error {
+	return tx.Model(&models.Message{}).
+		Where("id = ?", messageID).
+		Updates(map[string]any{"imported_task_id": taskID}).Error
 }
 
 func (r *MessageRepository) GetMessages(userID, correspondentID uuid.UUID, page, limit int) ([]models.Message, int64, error) {

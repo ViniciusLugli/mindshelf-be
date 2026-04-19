@@ -22,11 +22,12 @@ type MessageResponse struct {
 }
 
 type SharedTaskSnapshotResponse struct {
-	SourceTaskID uuid.UUID `json:"source_task_id"`
-	Title        string    `json:"title"`
-	Notes        string    `json:"notes"`
-	GroupName    string    `json:"group_name"`
-	GroupColor   string    `json:"group_color"`
+	SourceTaskID   uuid.UUID  `json:"source_task_id"`
+	ImportedTaskID *uuid.UUID `json:"imported_task_id,omitempty"`
+	Title          string     `json:"title"`
+	Notes          string     `json:"notes"`
+	GroupName      string     `json:"group_name"`
+	GroupColor     string     `json:"group_color"`
 }
 
 type MarkMessagesReadResponse struct {
@@ -47,11 +48,12 @@ func NewMessageResponse(m models.Message) MessageResponse {
 	var sharedTask *SharedTaskSnapshotResponse
 	if m.SharedTaskSourceID != nil {
 		sharedTask = &SharedTaskSnapshotResponse{
-			SourceTaskID: *m.SharedTaskSourceID,
-			Title:        m.SharedTaskTitle,
-			Notes:        m.SharedTaskNotes,
-			GroupName:    m.SharedTaskGroupName,
-			GroupColor:   m.SharedTaskGroupColor,
+			SourceTaskID:   *m.SharedTaskSourceID,
+			ImportedTaskID: m.ImportedTaskID,
+			Title:          m.SharedTaskTitle,
+			Notes:          m.SharedTaskNotes,
+			GroupName:      m.SharedTaskGroupName,
+			GroupColor:     m.SharedTaskGroupColor,
 		}
 	}
 

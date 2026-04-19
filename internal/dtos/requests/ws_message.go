@@ -30,3 +30,8 @@ type MarkMessagesReadRequest struct {
 	WithUserID    uuid.UUID  `json:"with_user_id"`
 	UpToMessageID *uuid.UUID `json:"up_to_message_id,omitempty"`
 }
+
+type ImportSharedTaskRequest struct {
+	MessageID uuid.UUID `json:"message_id" binding:"required,uuid"`
+	GroupID   uuid.UUID `json:"group_id" binding:"required,uuid"`
+}

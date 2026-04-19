@@ -47,6 +47,16 @@ definitions:
       with_user_id:
         type: string
     type: object
+  requests.ImportSharedTaskRequest:
+    properties:
+      group_id:
+        type: string
+      message_id:
+        type: string
+    required:
+    - group_id
+    - message_id
+    type: object
   requests.LoginRequest:
     properties:
       email:
@@ -227,6 +237,8 @@ definitions:
       group_color:
         type: string
       group_name:
+        type: string
+      imported_task_id:
         type: string
       notes:
         type: string
@@ -502,6 +514,57 @@ paths:
       summary: Update a group
       tags:
       - group
+  /api/shared-tasks/import:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Import shared task payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/requests.ImportSharedTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TaskResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Import a shared task snapshot
+      tags:
+      - shared-task
   /api/tasks:
     get:
       parameters:

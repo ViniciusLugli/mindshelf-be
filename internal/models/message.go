@@ -15,10 +15,11 @@ const (
 
 type Message struct {
 	BaseModel
-	Type       MessageType `gorm:"not null;default:text"`
-	SenderID   uuid.UUID   `gorm:"not null;index"`
-	ReceiverID uuid.UUID   `gorm:"not null;index"`
-	Content    string      `gorm:"not null"`
+	Type           MessageType `gorm:"not null;default:text"`
+	SenderID       uuid.UUID   `gorm:"not null;index"`
+	ReceiverID     uuid.UUID   `gorm:"not null;index"`
+	Content        string      `gorm:"not null"`
+	ImportedTaskID *uuid.UUID
 
 	SharedTaskSourceID   *uuid.UUID
 	SharedTaskTitle      string

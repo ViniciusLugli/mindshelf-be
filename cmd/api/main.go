@@ -54,6 +54,9 @@ func main() {
 	taskRepository := repositories.NewTaskRepository(db)
 	taskService := services.NewTaskService(taskRepository, groupRepository)
 	taskHandler := handlers.NewTaskHandler(taskService)
+	chatRepository := repositories.NewMessageRepository(db)
+	chatService := services.NewMessageService(chatRepository, taskRepository, groupRepository)
+	sharedTaskHandler := handlers.NewSharedTaskHandler(chatService)
 
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -96,10 +99,12 @@ func main() {
 		taskRoute.DELETE("/:id", taskHandler.Delete)
 	}
 
-	// WebSocket
+	{
+		sharedTaskRoute := protected.Group("/shared-tasks")
+		sharedTaskRoute.POST("/import", sharedTaskHandler.Import)
+	}
 
-	chatRepository := repositories.NewMessageRepository(db)
-	chatService := services.NewMessageService(chatRepository, taskRepository)
+	// WebSocket
 
 	hub := util.NewHub()
 	wsRouter := util.NewRouter()
