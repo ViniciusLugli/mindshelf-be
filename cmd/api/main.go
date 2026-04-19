@@ -29,6 +29,8 @@ import (
 func main() {
 	appLogger := logger.New("mindshelf-api")
 
+	repositories.RunUpMigrations()
+
 	err := godotenv.Load()
 	if err != nil {
 		appLogger.Warn("failed to load .env file", "error", err)
