@@ -57,17 +57,7 @@ definitions:
           - image-info.env
 
 pipelines:
-  pull-requests:
-    "**":
-      - step: *test_go
-
   branches:
-    develop:
-      - step: *test_go
-      - step:
-          <<: *docker_publish_go
-          deployment: staging
-
     main:
       - step: *test_go
       - step:
