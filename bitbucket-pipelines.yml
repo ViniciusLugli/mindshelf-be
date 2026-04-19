@@ -5,6 +5,9 @@ options:
 definitions:
   caches:
     go: /go/pkg/mod
+  services:
+    docker:
+      memory: 6144
   steps:
     - step: &test_go
         name: Testes - Go/Gin
@@ -23,6 +26,7 @@ definitions:
 
     - step: &docker_publish_go
         name: Build e Push Docker - Go/Gin
+        size: 2x
         services:
           - docker
         script:

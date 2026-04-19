@@ -1,0 +1,11 @@
+.git
+.gitignore
+.vscode
+
+app
+server
+coverage
+coverage.out
+
+*.log
+*.tmp
