@@ -1,0 +1,75 @@
+image: golang:1.24
+
+options:
+  docker: true
+  size: 2x
+
+definitions:
+  caches:
+    go: /go/pkg/mod
+
+  steps:
+    - step: &test_go
+        name: Testes - Go/Gin
+        caches:
+          - go
+        script:
+          - go version
+          - go mod download
+          - go fmt ./...
+          - test -z "$(gofmt -l .)" || (echo "Arquivos não formatados com gofmt" && exit 1)
+          - go vet ./...
+          - go test ./... -coverprofile=coverage.out
+          - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app ./...
+        artifacts:
+          - coverage.out
+          - Dockerfile
+
+    - step: &docker_publish_go
+        name: Build e Push Docker - Go/Gin
+        oidc: true
+        services:
+          - docker
+        script:
+          - export AWS_REGION=${AWS_REGION}
+          - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo "$BITBUCKET_STEP_OIDC_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+
+          - apt-get update && apt-get install -y unzip curl
+          - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          - unzip -q awscliv2.zip
+          - ./aws/install
+
+          - export IMAGE_TAG=${BITBUCKET_BRANCH//\//-}-${BITBUCKET_COMMIT:0:7}
+          - export IMAGE_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+          - export IMAGE_URI_LATEST=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest
+
+          - aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          - docker build -t "${IMAGE_URI}" -t "${IMAGE_URI_LATEST}" .
+          - docker push "${IMAGE_URI}"
+          - docker push "${IMAGE_URI_LATEST}"
+
+          - echo "IMAGE_TAG=${IMAGE_TAG}" > image-info.env
+          - echo "IMAGE_URI=${IMAGE_URI}" >> image-info.env
+        artifacts:
+          - image-info.env
+
+pipelines:
+  pull-requests:
+    "**":
+      - step: *test_go
+
+  branches:
+    develop:
+      - step: *test_go
+      - step:
+          <<: *docker_publish_go
+          deployment: staging
+
+    main:
+      - step: *test_go
+      - step:
+          <<: *docker_publish_go
+          deployment: production
