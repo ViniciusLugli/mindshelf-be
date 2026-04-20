@@ -54,7 +54,10 @@ definitions:
           - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           - unzip -q awscliv2.zip
           - ./aws/install
+          - set -a
           - source image-info.env
+          - set +a
+          - test -n "${IMAGE_URI}" || (echo "IMAGE_URI ausente em image-info.env" && cat image-info.env && exit 1)
           - export ECS_CONTAINER_NAME_BACKEND=${ECS_CONTAINER_NAME_BACKEND:-backend}
           - TASK_DEF=$(aws ecs describe-task-definition --task-definition ${ECS_TASK_FAMILY_BACKEND} --region ${AWS_REGION} --query 'taskDefinition' --output json)
           - NEW_TASK_DEF=$(echo "$TASK_DEF" | python3 -c "import json, os, sys; td = json.load(sys.stdin); target = os.environ.get('ECS_CONTAINER_NAME_BACKEND', 'backend'); image = os.environ['IMAGE_URI']; containers = td.get('containerDefinitions', []); idx = next((i for i, c in enumerate(containers) if c.get('name') == target), -1); idx >= 0 or sys.exit(f\"container '{target}' not found in task definition\"); containers[idx]['image'] = image; [td.pop(k, None) for k in ['taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy']]; print(json.dumps(td))")
