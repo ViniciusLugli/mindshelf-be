@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/requests"
 	"github.com/ViniciusLugli/mindshelf/internal/dtos/responses"
@@ -105,8 +106,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func setAuthCookie(c *gin.Context, token string) {
-	isSecure := c.Request.TLS != nil || os.Getenv("COOKIE_SECURE") == "true"
+	isSecure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https") || os.Getenv("COOKIE_SECURE") == "true"
+	domain := strings.TrimSpace(os.Getenv("COOKIE_DOMAIN"))
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(authCookieName, token, authCookieMaxAgeSeconds, "/", "", isSecure, true)
+	c.SetCookie(authCookieName, token, authCookieMaxAgeSeconds, "/", domain, isSecure, true)
 }
