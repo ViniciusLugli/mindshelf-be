@@ -55,11 +55,12 @@ definitions:
           - unzip -q awscliv2.zip
           - ./aws/install
           - source image-info.env
+          - export ECS_CONTAINER_NAME_BACKEND=${ECS_CONTAINER_NAME_BACKEND:-backend}
           - TASK_DEF=$(aws ecs describe-task-definition --task-definition ${ECS_TASK_FAMILY_BACKEND} --region ${AWS_REGION} --query 'taskDefinition' --output json)
-          - NEW_TASK_DEF=$(echo $TASK_DEF | python3 -c "import json, sys; td = json.load(sys.stdin); td['containerDefinitions'][0]['image'] = '$IMAGE_URI'; [td.pop(k, None) for k in ['taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy']]; print(json.dumps(td))")
+          - NEW_TASK_DEF=$(echo "$TASK_DEF" | python3 -c "import json, os, sys; td = json.load(sys.stdin); target = os.environ.get('ECS_CONTAINER_NAME_BACKEND', 'backend'); image = os.environ['IMAGE_URI']; containers = td.get('containerDefinitions', []); idx = next((i for i, c in enumerate(containers) if c.get('name') == target), -1); idx >= 0 or sys.exit(f\"container '{target}' not found in task definition\"); containers[idx]['image'] = image; [td.pop(k, None) for k in ['taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy']]; print(json.dumps(td))")
           - NEW_ARN=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --region ${AWS_REGION} --query 'taskDefinition.taskDefinitionArn' --output text)
           - aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE_BACKEND} --task-definition $NEW_ARN --force-new-deployment --region ${AWS_REGION}
-          - aws ecs wait services-stable --cluster ${ECS_CLUSTER} --services ${ECS_SERVICE_BACKEND} --region ${AWS_REGION}
+          - aws ecs wait services-stable --cluster ${ECS_CLUSTER} --services ${ECS_SERVICE_BACKEND} --region ${AWS_REGION} || (echo "ECS service failed to stabilize. Latest service events:" && aws ecs describe-services --cluster ${ECS_CLUSTER} --services ${ECS_SERVICE_BACKEND} --region ${AWS_REGION} --query 'services[0].events[0:20].[createdAt,message]' --output table && exit 1)
           - echo "Backend deployado com sucesso! Image ${IMAGE_URI}"
 
 pipelines:
