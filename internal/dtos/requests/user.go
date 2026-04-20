@@ -27,9 +27,10 @@ type LoginRequest struct {
 }
 
 type UpdateUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email" binding:"email"`
-	Password string `json:"password"`
+	Name                string `json:"name"`
+	Email               string `json:"email" binding:"email"`
+	Password            string `json:"password"`
+	OnboardingCompleted *bool  `json:"onboarding_completed"`
 }
 
 type FriendRequest struct {

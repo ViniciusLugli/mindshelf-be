@@ -1880,6 +1880,9 @@
                 "name": {
                     "type": "string"
                 },
+                "onboarding_completed": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 }
@@ -2124,6 +2127,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "onboarding_completed": {
+                    "type": "boolean"
                 }
             }
         }

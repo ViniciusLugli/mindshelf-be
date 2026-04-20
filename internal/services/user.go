@@ -41,6 +41,10 @@ func (s *UserService) Update(dto requests.UpdateUserRequest, id uuid.UUID) error
 		user.Password = hashedPassword
 	}
 
+	if dto.OnboardingCompleted != nil {
+		user.OnboardingCompleted = *dto.OnboardingCompleted
+	}
+
 	return s.repo.Update(&user)
 }
 

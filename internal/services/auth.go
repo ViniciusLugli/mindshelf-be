@@ -98,8 +98,10 @@ func (s *AuthService) GetProfile(userID uuid.UUID) (responses.UserResponse, erro
 	}
 
 	return responses.UserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:                  user.ID,
+		Name:                user.Name,
+		Email:               user.Email,
+		AvatarURL:           user.AvatarURL,
+		OnboardingCompleted: user.OnboardingCompleted,
 	}, nil
 }

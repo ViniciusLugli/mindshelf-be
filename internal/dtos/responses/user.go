@@ -8,10 +8,11 @@ import (
 )
 
 type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	AvatarURL string    `json:"avatar_url"`
+	ID                  uuid.UUID `json:"id"`
+	Name                string    `json:"name"`
+	Email               string    `json:"email"`
+	AvatarURL           string    `json:"avatar_url"`
+	OnboardingCompleted bool      `json:"onboarding_completed"`
 }
 
 type AuthResponse struct {
@@ -30,10 +31,11 @@ type StatusMessageResponse struct {
 
 func NewUserResponse(user models.User) UserResponse {
 	return UserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		AvatarURL: user.AvatarURL,
+		ID:                  user.ID,
+		Name:                user.Name,
+		Email:               user.Email,
+		AvatarURL:           user.AvatarURL,
+		OnboardingCompleted: user.OnboardingCompleted,
 	}
 }
 
@@ -41,10 +43,11 @@ func NewAuthResponse(token string, user models.User) AuthResponse {
 	return AuthResponse{
 		Token: token,
 		User: UserResponse{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			AvatarURL: user.AvatarURL,
+			ID:                  user.ID,
+			Name:                user.Name,
+			Email:               user.Email,
+			AvatarURL:           user.AvatarURL,
+			OnboardingCompleted: user.OnboardingCompleted,
 		},
 	}
 }

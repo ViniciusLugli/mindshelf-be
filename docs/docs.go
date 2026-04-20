@@ -1882,6 +1882,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "onboarding_completed": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 }
@@ -2126,6 +2129,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "onboarding_completed": {
+                    "type": "boolean"
                 }
             }
         }
