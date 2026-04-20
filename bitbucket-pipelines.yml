@@ -48,28 +48,137 @@ definitions:
         name: Deploy ECS - Go/Gin
         image: python:3.12-slim
         script:
-          - apt-get update && apt-get install -y unzip curl
-          - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          - unzip -q awscliv2.zip
-          - ./aws/install
-          - set -a
-          - . ./image-info.env
-          - set +a
-          - export CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster "${ECS_CLUSTER}" --services "${ECS_SERVICE_BACKEND}" --region "${AWS_REGION}" --query 'services[0].taskDefinition' --output text)
-          - export TASK_DEF=$(aws ecs describe-task-definition --task-definition "${CURRENT_TASK_DEF_ARN}" --region "${AWS_REGION}" --query 'taskDefinition' --output json)
           - |
-            export NEW_TASK_DEF=$(echo "${TASK_DEF}" | python3 -c "
+            set -euo pipefail
+
+            apt-get update && apt-get install -y unzip curl
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip -q awscliv2.zip
+            ./aws/install
+
+            set -a
+            . ./image-info.env
+            set +a
+
+            print_task_logs() {
+              local task_arns="$1"
+              local log_group="$2"
+              local container_name="$3"
+
+              if [ -z "${task_arns}" ] || [ "${task_arns}" = "None" ]; then
+                return 0
+              fi
+
+              for task_arn in ${task_arns}; do
+                local task_id="${task_arn##*/}"
+                local log_stream="ecs/${container_name}/${task_id}"
+
+                echo "Recent logs from ${log_stream}"
+                aws logs get-log-events \
+                  --log-group-name "${log_group}" \
+                  --log-stream-name "${log_stream}" \
+                  --limit 50 \
+                  --region "${AWS_REGION}" \
+                  --query 'events[*].message' \
+                  --output text || true
+              done
+            }
+
+            print_deploy_diagnostics() {
+              echo "ECS service diagnostics"
+              aws ecs describe-services \
+                --cluster "${ECS_CLUSTER}" \
+                --services "${ECS_SERVICE_BACKEND}" \
+                --region "${AWS_REGION}" || true
+
+              RUNNING_TASKS=$(aws ecs list-tasks \
+                --cluster "${ECS_CLUSTER}" \
+                --service-name "${ECS_SERVICE_BACKEND}" \
+                --desired-status RUNNING \
+                --region "${AWS_REGION}" \
+                --query 'taskArns' \
+                --output text || true)
+
+              STOPPED_TASKS=$(aws ecs list-tasks \
+                --cluster "${ECS_CLUSTER}" \
+                --service-name "${ECS_SERVICE_BACKEND}" \
+                --desired-status STOPPED \
+                --region "${AWS_REGION}" \
+                --query 'taskArns[:5]' \
+                --output text || true)
+
+              if [ -n "${RUNNING_TASKS}" ] && [ "${RUNNING_TASKS}" != "None" ]; then
+                echo "Running task details"
+                aws ecs describe-tasks \
+                  --cluster "${ECS_CLUSTER}" \
+                  --tasks ${RUNNING_TASKS} \
+                  --region "${AWS_REGION}" || true
+              fi
+
+              if [ -n "${STOPPED_TASKS}" ] && [ "${STOPPED_TASKS}" != "None" ]; then
+                echo "Stopped task details"
+                aws ecs describe-tasks \
+                  --cluster "${ECS_CLUSTER}" \
+                  --tasks ${STOPPED_TASKS} \
+                  --region "${AWS_REGION}" || true
+              fi
+
+              LOG_GROUP=$(aws ecs describe-task-definition \
+                --task-definition "${NEW_ARN}" \
+                --region "${AWS_REGION}" \
+                --query 'taskDefinition.containerDefinitions[?name==`backend`].logConfiguration.options."awslogs-group" | [0]' \
+                --output text || true)
+
+              if [ -n "${LOG_GROUP}" ] && [ "${LOG_GROUP}" != "None" ]; then
+                print_task_logs "${RUNNING_TASKS}" "${LOG_GROUP}" "backend"
+                print_task_logs "${STOPPED_TASKS}" "${LOG_GROUP}" "backend"
+              fi
+            }
+
+            CURRENT_TASK_DEF_ARN=$(aws ecs describe-services \
+              --cluster "${ECS_CLUSTER}" \
+              --services "${ECS_SERVICE_BACKEND}" \
+              --region "${AWS_REGION}" \
+              --query 'services[0].taskDefinition' \
+              --output text)
+
+            TASK_DEF=$(aws ecs describe-task-definition \
+              --task-definition "${CURRENT_TASK_DEF_ARN}" \
+              --region "${AWS_REGION}" \
+              --query 'taskDefinition' \
+              --output json)
+
+            NEW_TASK_DEF=$(echo "${TASK_DEF}" | python3 -c "
             import json, sys, os
             td = json.load(sys.stdin)
             td['containerDefinitions'][0]['image'] = os.environ['IMAGE_URI']
-            for k in ['taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy']:
+            for k in ['taskDefinitionArn', 'revision', 'status', 'requiresAttributes', 'compatibilities', 'registeredAt', 'registeredBy']:
                 td.pop(k, None)
             print(json.dumps(td))
             ")
-          - export NEW_ARN=$(aws ecs register-task-definition --cli-input-json "${NEW_TASK_DEF}" --region "${AWS_REGION}" --query 'taskDefinition.taskDefinitionArn' --output text)
-          - aws ecs update-service --cluster "${ECS_CLUSTER}" --service "${ECS_SERVICE_BACKEND}" --task-definition "${NEW_ARN}" --force-new-deployment --region "${AWS_REGION}"
-          - aws ecs wait services-stable --cluster "${ECS_CLUSTER}" --services "${ECS_SERVICE_BACKEND}" --region "${AWS_REGION}"
-          - echo "Backend deployed successfully. Image ${IMAGE_URI}"
+
+            NEW_ARN=$(aws ecs register-task-definition \
+              --cli-input-json "${NEW_TASK_DEF}" \
+              --region "${AWS_REGION}" \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text)
+
+            aws ecs update-service \
+              --cluster "${ECS_CLUSTER}" \
+              --service "${ECS_SERVICE_BACKEND}" \
+              --task-definition "${NEW_ARN}" \
+              --force-new-deployment \
+              --region "${AWS_REGION}"
+
+            if ! aws ecs wait services-stable \
+              --cluster "${ECS_CLUSTER}" \
+              --services "${ECS_SERVICE_BACKEND}" \
+              --region "${AWS_REGION}"; then
+              print_deploy_diagnostics
+              exit 1
+            fi
+
+            echo "Backend deployed successfully. Image ${IMAGE_URI}"
 
 pipelines:
   branches:
