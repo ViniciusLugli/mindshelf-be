@@ -68,6 +68,12 @@ func main() {
 
 	router.POST("/register", authHandler.Register)
 	router.POST("/login", authHandler.Login)
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	protected := router.Group("/api")
 	protected.Use(middlewares.Auth())
