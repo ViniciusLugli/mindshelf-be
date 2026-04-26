@@ -26,6 +26,11 @@ Em termos praticos, o fluxo principal e:
 5. o mesmo usuario pode abrir uma conexao WebSocket em `/api/ws`
 6. a partir do socket, pode conversar, compartilhar tarefas e gerenciar amizades
 
+### Links para o repositório
+
+- [Github]("https://github.com/ViniciusLugli/mindshelf-be")
+- [Bitbucket]("https://bitbucket.org/viniciuslugli/mindshelf-be/src/main/")
+
 ## Funcionalidades
 
 ### HTTP / REST
@@ -117,15 +122,15 @@ COOKIE_SECURE="false"
 
 ### O que cada variavel faz
 
-| Variavel | Obrigatoria | Descricao |
-| --- | --- | --- |
-| `DATABASE_URL` | Sim | URL usada nas migracoes e tambem como opcao principal de conexao com o banco |
-| `DSN` | Opcional | String alternativa de conexao usada como fallback em `ConnectDB()` |
-| `JWT_SECRET` | Sim | Segredo para gerar e validar tokens JWT |
-| `LOG_LEVEL` | Nao | Nivel de log: `debug`, `info`, `warn`, `error` |
-| `ALLOWED_ORIGINS` | Nao | Lista separada por virgula de origens aceitas no upgrade WebSocket |
-| `PORT` | Nao | Porta do servidor HTTP; padrao `8080` |
-| `COOKIE_SECURE` | Nao | Se `true`, marca o cookie de autenticacao como seguro |
+| Variavel          | Obrigatoria | Descricao                                                                    |
+| ----------------- | ----------- | ---------------------------------------------------------------------------- |
+| `DATABASE_URL`    | Sim         | URL usada nas migracoes e tambem como opcao principal de conexao com o banco |
+| `DSN`             | Opcional    | String alternativa de conexao usada como fallback em `ConnectDB()`           |
+| `JWT_SECRET`      | Sim         | Segredo para gerar e validar tokens JWT                                      |
+| `LOG_LEVEL`       | Nao         | Nivel de log: `debug`, `info`, `warn`, `error`                               |
+| `ALLOWED_ORIGINS` | Nao         | Lista separada por virgula de origens aceitas no upgrade WebSocket           |
+| `PORT`            | Nao         | Porta do servidor HTTP; padrao `8080`                                        |
+| `COOKIE_SECURE`   | Nao         | Se `true`, marca o cookie de autenticacao como seguro                        |
 
 Importante:
 
@@ -242,47 +247,47 @@ As rotas abaixo representam o uso principal da API.
 
 ### Publicas
 
-| Metodo | Rota | Descricao |
-| --- | --- | --- |
-| `POST` | `/register` | Cria usuario e retorna token |
-| `POST` | `/login` | Autentica usuario e retorna token |
-| `GET` | `/swagger` | Redireciona para a UI do Swagger |
-| `GET` | `/swagger/index.html` | Documentacao interativa |
+| Metodo | Rota                  | Descricao                         |
+| ------ | --------------------- | --------------------------------- |
+| `POST` | `/register`           | Cria usuario e retorna token      |
+| `POST` | `/login`              | Autentica usuario e retorna token |
+| `GET`  | `/swagger`            | Redireciona para a UI do Swagger  |
+| `GET`  | `/swagger/index.html` | Documentacao interativa           |
 
 ### Usuarios
 
-| Metodo | Rota | Descricao |
-| --- | --- | --- |
-| `GET` | `/api/users` | Lista usuarios com paginacao |
-| `GET` | `/api/users/me` | Retorna o usuario autenticado |
-| `GET` | `/api/users/:id` | Busca usuario por ID |
-| `PATCH` | `/api/users/me` | Atualiza o proprio usuario |
-| `DELETE` | `/api/users/me` | Remove o proprio usuario |
+| Metodo   | Rota             | Descricao                     |
+| -------- | ---------------- | ----------------------------- |
+| `GET`    | `/api/users`     | Lista usuarios com paginacao  |
+| `GET`    | `/api/users/me`  | Retorna o usuario autenticado |
+| `GET`    | `/api/users/:id` | Busca usuario por ID          |
+| `PATCH`  | `/api/users/me`  | Atualiza o proprio usuario    |
+| `DELETE` | `/api/users/me`  | Remove o proprio usuario      |
 
 ### Grupos
 
-| Metodo | Rota | Descricao |
-| --- | --- | --- |
-| `GET` | `/api/groups` | Lista grupos do usuario autenticado |
-| `GET` | `/api/groups/:id` | Busca grupo por ID |
-| `POST` | `/api/groups` | Cria grupo |
-| `PATCH` | `/api/groups/:id` | Atualiza grupo |
-| `DELETE` | `/api/groups/:id` | Remove grupo |
+| Metodo   | Rota              | Descricao                           |
+| -------- | ----------------- | ----------------------------------- |
+| `GET`    | `/api/groups`     | Lista grupos do usuario autenticado |
+| `GET`    | `/api/groups/:id` | Busca grupo por ID                  |
+| `POST`   | `/api/groups`     | Cria grupo                          |
+| `PATCH`  | `/api/groups/:id` | Atualiza grupo                      |
+| `DELETE` | `/api/groups/:id` | Remove grupo                        |
 
 ### Tarefas
 
-| Metodo | Rota | Descricao |
-| --- | --- | --- |
-| `GET` | `/api/tasks` | Lista tarefas com filtros e paginacao |
-| `GET` | `/api/tasks/:id` | Busca tarefa por ID |
-| `POST` | `/api/tasks` | Cria tarefa |
-| `PATCH` | `/api/tasks/:id` | Atualiza tarefa |
-| `DELETE` | `/api/tasks/:id` | Remove tarefa |
+| Metodo   | Rota             | Descricao                             |
+| -------- | ---------------- | ------------------------------------- |
+| `GET`    | `/api/tasks`     | Lista tarefas com filtros e paginacao |
+| `GET`    | `/api/tasks/:id` | Busca tarefa por ID                   |
+| `POST`   | `/api/tasks`     | Cria tarefa                           |
+| `PATCH`  | `/api/tasks/:id` | Atualiza tarefa                       |
+| `DELETE` | `/api/tasks/:id` | Remove tarefa                         |
 
 ### Tarefas compartilhadas
 
-| Metodo | Rota | Descricao |
-| --- | --- | --- |
+| Metodo | Rota                       | Descricao                             |
+| ------ | -------------------------- | ------------------------------------- |
 | `POST` | `/api/shared-tasks/import` | Importa uma tarefa recebida pelo chat |
 
 ## Parametros comuns de listagem
@@ -388,19 +393,19 @@ Servidor -> cliente:
 
 ### Acoes disponiveis
 
-| Action | Objetivo | Resposta principal |
-| --- | --- | --- |
-| `send_message` | Envia mensagem para outro usuario | `message_sent` para o remetente e `message_received` para o destino |
-| `share_task` | Compartilha snapshot de uma tarefa | `message_sent` / `message_received` |
-| `get_conversation` | Retorna historico com outro usuario | `get_conversation` |
-| `get_chats` | Lista chats recentes | `get_chats` |
-| `mark_messages_read` | Marca mensagens como lidas | `mark_messages_read` e possivel broadcast `messages_read` |
-| `send_friend_request` | Envia pedido de amizade | `send_friend_request` |
-| `accept_friend_request` | Aceita amizade pendente | `accept_friend_request` |
-| `reject_friend_request` | Rejeita amizade pendente | `reject_friend_request` |
-| `remove_friend` | Remove amizade | `remove_friend` |
-| `get_friends` | Lista amigos | `get_friends` |
-| `get_pending_friend_requests` | Lista convites pendentes recebidos | `get_pending_friend_requests` |
+| Action                        | Objetivo                            | Resposta principal                                                  |
+| ----------------------------- | ----------------------------------- | ------------------------------------------------------------------- |
+| `send_message`                | Envia mensagem para outro usuario   | `message_sent` para o remetente e `message_received` para o destino |
+| `share_task`                  | Compartilha snapshot de uma tarefa  | `message_sent` / `message_received`                                 |
+| `get_conversation`            | Retorna historico com outro usuario | `get_conversation`                                                  |
+| `get_chats`                   | Lista chats recentes                | `get_chats`                                                         |
+| `mark_messages_read`          | Marca mensagens como lidas          | `mark_messages_read` e possivel broadcast `messages_read`           |
+| `send_friend_request`         | Envia pedido de amizade             | `send_friend_request`                                               |
+| `accept_friend_request`       | Aceita amizade pendente             | `accept_friend_request`                                             |
+| `reject_friend_request`       | Rejeita amizade pendente            | `reject_friend_request`                                             |
+| `remove_friend`               | Remove amizade                      | `remove_friend`                                                     |
+| `get_friends`                 | Lista amigos                        | `get_friends`                                                       |
+| `get_pending_friend_requests` | Lista convites pendentes recebidos  | `get_pending_friend_requests`                                       |
 
 ### Exemplo: enviar mensagem
 
